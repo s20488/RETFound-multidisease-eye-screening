@@ -14,6 +14,7 @@ import subprocess
 
 import torch
 import torch.backends.cudnn as cudnn
+import yaml
 from torch.utils.tensorboard import SummaryWriter
 
 import timm
@@ -32,6 +33,23 @@ from util.misc import NativeScalerWithGradNormCount as NativeScaler
 import models_vit
 
 from engine_finetune import train_one_epoch, evaluate
+
+
+def load_config(config_path):
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    config['batch_size'] = int(config['batch_size'])
+    config['world_size'] = int(config['world_size'])
+    config['epochs'] = int(config['epochs'])
+    config['blr'] = float(config['blr'])
+    config['layer_decay'] = float(config['layer_decay'])
+    config['weight_decay'] = float(config['weight_decay'])
+    config['drop_path'] = float(config['drop_path'])
+    config['nb_classes'] = int(config['nb_classes'])
+    config['input_size'] = int(config['input_size'])
+
+    return config
 
 
 def get_args_parser():
@@ -372,27 +390,15 @@ def main(args):
 
 
 if __name__ == '__main__':
-    command = [
-        'conda', 'activate', 'retfound',
-        '&&', 'python', '-m', 'torch.distributed.launch', '--nproc_per_node=1', '--master_port=48798',
-        'main_finetune.py',
-        '--batch_size', '1',
-        '--world_size', '1',
-        '--model', 'vit_large_patch16',
-        '--epochs', '1',
-        '--blr', '5e-3', '--layer_decay', '0.65',
-        '--weight_decay', '0.05', '--drop_path', '0.2',
-        '--nb_classes', '2',
-        '--data_path', 'dataset',
-        '--task', 'finetune_IDRiD',
-        '--finetune', 'RETFound_cfp_weights.pth',
-        '--input_size', '224'
-    ]
-    subprocess.run(' '.join(command), shell=True)
+    parser = get_args_parser()
+    args = parser.parse_args()
 
-    args = get_args_parser()
-    args = args.parse_args()
+    config = load_config('config.yaml')
+
+    for key, value in config.items():
+        setattr(args, key, value)
 
     if args.output_dir:
         Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+
     main(args)
