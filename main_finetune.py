@@ -9,12 +9,11 @@ import json
 import numpy as np
 import os
 import time
+import yaml
 from pathlib import Path
-import subprocess
 
 import torch
 import torch.backends.cudnn as cudnn
-import yaml
 from torch.utils.tensorboard import SummaryWriter
 
 import timm
@@ -33,23 +32,6 @@ from util.misc import NativeScalerWithGradNormCount as NativeScaler
 import models_vit
 
 from engine_finetune import train_one_epoch, evaluate
-
-
-def load_config(config_path):
-    with open(config_path, 'r') as f:
-        config = yaml.safe_load(f)
-
-    config['batch_size'] = int(config['batch_size'])
-    config['world_size'] = int(config['world_size'])
-    config['epochs'] = int(config['epochs'])
-    config['blr'] = float(config['blr'])
-    config['layer_decay'] = float(config['layer_decay'])
-    config['weight_decay'] = float(config['weight_decay'])
-    config['drop_path'] = float(config['drop_path'])
-    config['nb_classes'] = int(config['nb_classes'])
-    config['input_size'] = int(config['input_size'])
-
-    return config
 
 
 def get_args_parser():
@@ -73,7 +55,7 @@ def get_args_parser():
     # Optimizer parameters
     parser.add_argument('--clip_grad', type=float, default=None, metavar='NORM',
                         help='Clip gradient norm (default: None, no clipping)')
-    parser.add_argument('--weight_decay', type=float,   default=0.05,
+    parser.add_argument('--weight_decay', type=float, default=0.05,
                         help='weight decay (default: 0.05)')
 
     parser.add_argument('--lr', type=float, default=None, metavar='LR',
@@ -96,8 +78,6 @@ def get_args_parser():
                         help='Use AutoAugment policy. "v0" or "original". " + "(default: rand-m9-mstd0.5-inc1)'),
     parser.add_argument('--smoothing', type=float, default=0.1,
                         help='Label smoothing (default: 0.1)')
-    parser.add_argument('--vflip', type=bool, default=True,
-                        help='Random vertical flip (default: True)')
 
     # * Random Erase params
     parser.add_argument('--reprob', type=float, default=0.25, metavar='PCT',
@@ -155,7 +135,7 @@ def get_args_parser():
                         help='Perform evaluation only')
     parser.add_argument('--dist_eval', action='store_true', default=False,
                         help='Enabling distributed evaluation (recommended during training for faster monitor')
-    parser.add_argument('--num_workers', default=8, type=int)
+    parser.add_argument('--num_workers', default=10, type=int)
     parser.add_argument('--pin_mem', action='store_true',
                         help='Pin CPU memory in DataLoader for more efficient (sometimes) transfer to GPU.')
     parser.add_argument('--no_pin_mem', action='store_false', dest='pin_mem')
@@ -170,6 +150,23 @@ def get_args_parser():
                         help='url used to set up distributed training')
 
     return parser
+
+
+def load_config(config_path):
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+
+    config['batch_size'] = int(config['batch_size'])
+    config['world_size'] = int(config['world_size'])
+    config['epochs'] = int(config['epochs'])
+    config['blr'] = float(config['blr'])
+    config['layer_decay'] = float(config['layer_decay'])
+    config['weight_decay'] = float(config['weight_decay'])
+    config['drop_path'] = float(config['drop_path'])
+    config['nb_classes'] = int(config['nb_classes'])
+    config['input_size'] = int(config['input_size'])
+
+    return config
 
 
 def main(args):
@@ -365,10 +362,6 @@ def main(args):
                     args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                     loss_scaler=loss_scaler, epoch=epoch)
 
-        if epoch == (args.epochs - 1):
-            test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch, mode='test',
-                                           num_class=args.nb_classes)
-
         if log_writer is not None:
             log_writer.add_scalar('perf/val_acc1', val_stats['acc1'], epoch)
             log_writer.add_scalar('perf/val_auc', val_auc_roc, epoch)
@@ -387,13 +380,18 @@ def main(args):
     total_time = time.time() - start_time
     total_time_str = str(datetime.timedelta(seconds=int(total_time)))
     print('Training time {}'.format(total_time_str))
+    state_dict_best = torch.load(args.task + 'checkpoint-best.pth', map_location='cpu')
+    model_without_ddp.load_state_dict(state_dict_best['model'])
+    test_stats, auc_roc = evaluate(data_loader_test, model_without_ddp, device, args.task, epoch=0, mode='test',
+                                   num_class=args.nb_classes)
 
 
 if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
 
-    config = load_config('config.yaml')
+    config = load_config('training_config.yaml')
+    # config = load_config('evaluation_config.yaml')  # for evaluation only
 
     for key, value in config.items():
         setattr(args, key, value)
