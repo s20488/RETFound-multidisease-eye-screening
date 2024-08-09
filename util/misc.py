@@ -233,7 +233,7 @@ def init_distributed_mode(args):
     args.distributed = True
 
     torch.cuda.set_device(args.gpu)
-    args.dist_backend = 'gloo'  # nccl -> gloo
+    args.dist_backend = 'nccl'
     print('| distributed init (rank {}): {}, gpu {}'.format(
         args.rank, args.dist_url, args.gpu), flush=True)
     torch.distributed.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
@@ -282,7 +282,8 @@ def get_grad_norm_(parameters, norm_type: float = 2.0) -> torch.Tensor:
     if norm_type == inf:
         total_norm = max(p.grad.detach().abs().max().to(device) for p in parameters)
     else:
-        total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]), norm_type)
+        total_norm = torch.norm(torch.stack([torch.norm(p.grad.detach(), norm_type).to(device) for p in parameters]),
+                                norm_type)
     return total_norm
 
 
@@ -290,7 +291,7 @@ def save_model(args, epoch, model, model_without_ddp, optimizer, loss_scaler):
     output_dir = Path(args.output_dir)
     epoch_name = str(epoch)
     if loss_scaler is not None:
-        checkpoint_paths = [args.task+'checkpoint-best.pth']
+        checkpoint_paths = [args.task + 'checkpoint-best.pth']
         for checkpoint_path in checkpoint_paths:
             to_save = {
                 'model': model_without_ddp.state_dict(),
@@ -304,6 +305,27 @@ def save_model(args, epoch, model, model_without_ddp, optimizer, loss_scaler):
     else:
         client_state = {'epoch': epoch}
         model.save_checkpoint(save_dir=args.task, tag="checkpoint-best", client_state=client_state)
+
+
+def save_model_pretrain(args, epoch, model, model_without_ddp, optimizer, loss_scaler):
+    output_dir = Path(args.output_dir)
+    epoch_name = str(epoch)
+    if loss_scaler is not None:
+        print(model_without_ddp.state_dict().keys())
+        checkpoint_paths = [output_dir / ('checkpoint-%s.pth' % epoch_name)]
+        for checkpoint_path in checkpoint_paths:
+            to_save = {
+                'model': model_without_ddp.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'epoch': epoch,
+                'scaler': loss_scaler.state_dict(),
+                'args': args,
+            }
+
+            save_on_master(to_save, checkpoint_path)
+    else:
+        client_state = {'epoch': epoch}
+        model.save_checkpoint(save_dir=args.output_dir, tag="checkpoint-%s" % epoch_name, client_state=client_state)
 
 
 def load_model(args, model_without_ddp, optimizer, loss_scaler):
@@ -332,4 +354,3 @@ def all_reduce_mean(x):
         return x_reduce.item()
     else:
         return x
-    
