@@ -170,7 +170,7 @@ def load_config(config_path):
 
     return config
 
-@profile
+
 def main(args):
     misc.init_distributed_mode(args)
 

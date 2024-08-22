@@ -1,4 +1,4 @@
-batch_size: 32
+batch_size: 16
 world_size: 2
 model: vit_large_patch16
 epochs: 50
