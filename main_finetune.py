@@ -385,7 +385,6 @@ def main(args):
     test_stats, auc_roc = evaluate(data_loader_test, model_without_ddp, device, args.task, epoch=0, mode='test',
                                    num_class=args.nb_classes)
 
-
 if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
