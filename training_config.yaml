@@ -1,5 +1,5 @@
-batch_size: 1
-world_size: 1
+batch_size: 32
+world_size: 2
 model: vit_large_patch16
 epochs: 50
 blr: 5e-3
@@ -11,3 +11,4 @@ data_path: ORIGA
 task: finetune_IDRiD  # specifies the folder for logs and checkpoints
 finetune: RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
 input_size: 224
+dist_on_itp: true

@@ -6,6 +6,7 @@
 import argparse
 import datetime
 import json
+
 import numpy as np
 import os
 import time
@@ -14,6 +15,7 @@ from pathlib import Path
 
 import torch
 import torch.backends.cudnn as cudnn
+from memory_profiler import profile
 from torch.utils.tensorboard import SummaryWriter
 
 import timm
@@ -168,7 +170,7 @@ def load_config(config_path):
 
     return config
 
-
+@profile
 def main(args):
     misc.init_distributed_mode(args)
 
@@ -384,6 +386,7 @@ def main(args):
     model_without_ddp.load_state_dict(state_dict_best['model'])
     test_stats, auc_roc = evaluate(data_loader_test, model_without_ddp, device, args.task, epoch=0, mode='test',
                                    num_class=args.nb_classes)
+
 
 if __name__ == '__main__':
     parser = get_args_parser()
