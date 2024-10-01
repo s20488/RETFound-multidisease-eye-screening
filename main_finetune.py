@@ -15,7 +15,6 @@ from pathlib import Path
 
 import torch
 import torch.backends.cudnn as cudnn
-from memory_profiler import profile
 from torch.utils.tensorboard import SummaryWriter
 
 import timm
@@ -230,7 +229,7 @@ def main(args):
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         pin_memory=args.pin_mem,
-        drop_last=True,
+        drop_last=True
     )
 
     data_loader_val = torch.utils.data.DataLoader(
