@@ -13,6 +13,8 @@ import torch
 # Transformer: https://github.com/tensorflow/models/blob/master/official/nlp/transformer/model_utils.py
 # MoCo v3: https://github.com/facebookresearch/moco-v3
 # --------------------------------------------------------
+
+
 def get_2d_sincos_pos_embed(embed_dim, grid_size, cls_token=False):
     """
     grid_size: int of the grid height and width
