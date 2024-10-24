@@ -2,11 +2,11 @@ eval: true
 batch_size: 64
 world_size: 1
 model: vit_large_patch16
-epochs: 50
-blr: 5e-3
-layer_decay: 0.65
-weight_decay: 0.05
-drop_path: 0.2
+epochs: 50  # try deleting it
+blr: 5e-3  # try deleting it
+layer_decay: 0.65  # try deleting it
+weight_decay: 0.05  # try deleting it
+drop_path: 0.2  # try deleting it
 nb_classes: 2
 data_path:
 task: internal_IDRiD/
