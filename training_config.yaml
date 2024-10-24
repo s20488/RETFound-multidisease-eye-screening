@@ -1,4 +1,4 @@
-batch_size: 16
+batch_size: 64
 world_size: 1
 model: vit_large_patch16
 epochs: 50
@@ -8,6 +8,6 @@ weight_decay: 0.05
 drop_path: 0.2
 nb_classes: 2
 data_path:
-task: finetune_IDRiD  # specifies the folder for logs and checkpoints
+task: finetune_IDRiD/  # specifies the folder for logs and checkpoints
 finetune: RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
 input_size: 224

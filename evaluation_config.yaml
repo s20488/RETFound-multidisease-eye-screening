@@ -1,5 +1,5 @@
 eval: true
-batch_size: 16
+batch_size: 64
 world_size: 1
 model: vit_large_patch16
 epochs: 50
@@ -9,6 +9,6 @@ weight_decay: 0.05
 drop_path: 0.2
 nb_classes: 2
 data_path:
-task: internal_IDRiD
+task: internal_IDRiD/
 resume: finetune_IDRiD/checkpoint-best.pth
 input_size: 224
