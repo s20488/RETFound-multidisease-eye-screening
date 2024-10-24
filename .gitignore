@@ -147,7 +147,7 @@ internal_IDRiD
 finetune_IDRiD
 
 # Datasets Jupyter processing
-origa_dataset_processing
-bialostok_dataset_processing
-
-unknown_dataset_processing.ipynb
+ORIGA_dataset
+ODIR_dataset
+unknown_HR_dataset
+bialostok_dataset
