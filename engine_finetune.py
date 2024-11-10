@@ -168,7 +168,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
             true_label_onehot_list.extend(true_label.cpu().detach().numpy())
             prediction_list.extend(prediction_softmax.cpu().detach().numpy())
 
-        acc1,_ = accuracy(output, target, topk=(1,2))
+        acc1,_ = accuracy(output, target, topk=(1,2))  # change acc1 on top_1_acc
 
         batch_size = images.shape[0]
         metric_logger.update(loss=loss.item())
