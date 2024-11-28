@@ -139,7 +139,7 @@ IDRiD_data
 origa
 
 # RETFound pre-trained weights
-RETFound_cfp_weights.pth
+# RETFound_cfp_weights.pth
 
 # ORIGA set outputs
 output_dir
