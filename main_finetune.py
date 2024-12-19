@@ -368,14 +368,6 @@ def main(args):
             log_writer.add_scalar('perf/val_auc', val_auc_roc, epoch)  # auc-roc
             log_writer.add_scalar('perf/val_loss', val_stats['loss'], epoch)
 
-            # Add more parameters
-            # log_writer.add_scalar('perf/val_sensitivity', val_stats['sensitivity'], epoch)
-            # log_writer.add_scalar('perf/val_specificity', val_stats['specificity'], epoch)
-            # log_writer.add_scalar('perf/val_precision', val_stats['precision'], epoch)
-            # log_writer.add_scalar('perf/val_f1', val_stats['F1'], epoch)
-            # log_writer.add_scalar('perf/val_mcc', val_stats['mcc'], epoch)
-            # log_writer.add_scalar('perf/val_auc_pr', val_stats['auc_pr'], epoch)
-
         log_stats = {**{f'train_{k}': v for k, v in train_stats.items()},
                      'epoch': epoch,
                      'n_parameters': n_parameters}
