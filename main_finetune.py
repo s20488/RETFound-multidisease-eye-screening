@@ -158,14 +158,24 @@ def load_config(config_path):
         config = yaml.safe_load(f)
 
     config['batch_size'] = int(config['batch_size'])
+    config['accum_iter'] = int(config['accum_iter'])
     config['world_size'] = int(config['world_size'])
     config['epochs'] = int(config['epochs'])
+    config['warmup_epochs'] = int(config['warmup_epochs'])
+    config['nb_classes'] = int(config['nb_classes'])
+    config['input_size'] = int(config['input_size'])
+    config['num_workers'] = int(config['num_workers'])
+
     config['blr'] = float(config['blr'])
     config['layer_decay'] = float(config['layer_decay'])
     config['weight_decay'] = float(config['weight_decay'])
     config['drop_path'] = float(config['drop_path'])
-    config['nb_classes'] = int(config['nb_classes'])
-    config['input_size'] = int(config['input_size'])
+    config['smoothing'] = float(config['smoothing'])
+    config['color_jitter'] = float(config['color_jitter'])
+    config['reprob'] = float(config['reprob'])
+    config['mixup'] = float(config['mixup'])
+    config['cutmix'] = float(config['cutmix'])
+    config['mixup_prob'] = float(config['mixup_prob'])
 
     return config
 

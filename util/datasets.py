@@ -48,7 +48,7 @@ def build_transform(is_train, args):
     t.append(
         transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC), 
     )
-    t.append(transforms.CenterCrop(args.input_size))
+    t.append(transforms.CenterCrop(int(args.input_size)))
     t.append(transforms.ToTensor())
     t.append(transforms.Normalize(mean, std))
     return transforms.Compose(t)

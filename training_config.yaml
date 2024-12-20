@@ -1,21 +1,13 @@
-# Batch and Model
 batch_size: 16
 accum_iter: 2
 model: vit_large_patch16
-
-# Optimizer
 blr: 5e-4
-min_lr: 1e-6
 layer_decay: 0.65
 weight_decay: 0.01
 epochs: 30
 warmup_epochs: 5
-
-# Regularization
 drop_path: 0.2
 smoothing: 0.1
-
-# Augmentations
 color_jitter: 0.1
 aa: 'v0'
 reprob: 0.1
@@ -23,19 +15,11 @@ mixup: 0.5
 cutmix: 0.5
 mixup_prob: 0.5
 mixup_mode: 'batch'
-
-# Dataset
-nb_classes: 2
+nb_classes: 8
 input_size: 224
-
-# Performance
 num_workers: 8
 world_size: 1
 pin_mem: True
-
-# Logging
-log_dir: './output_dir'
-
-data_path:
-task: finetune_IDRiD/  # specifies the folder for logs and checkpoints
-finetune: RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
+data_path: ./datasets/ODIR/
+task: ./finetune_IDRiD/  # specifies the folder for logs and checkpoints
+finetune: ./RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
