@@ -21,5 +21,5 @@ num_workers: 8
 world_size: 1
 pin_mem: True
 data_path: ./datasets/ODIR/
-task: ./finetune_IDRiD/  # specifies the folder for logs and checkpoints
+task: ./finetune_ODIR/  # specifies the folder for logs and checkpoints
 finetune: ./RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
