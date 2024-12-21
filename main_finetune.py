@@ -390,7 +390,7 @@ def main(args):
                      'n_parameters': n_parameters}
 
         if args.output_dir and misc.is_main_process():
-            output_dir = Path(args.output_dir) / "output_dir"
+            output_dir = Path(args.task) / args.output_dir
             output_dir.mkdir(parents=True, exist_ok=True)
             if log_writer is not None:
                 log_writer.flush()
