@@ -228,9 +228,16 @@ def main(args):
         else:
             sampler_test = torch.utils.data.SequentialSampler(dataset_test)
 
+    # if global_rank == 0 and args.log_dir is not None and not args.eval:
+    #     os.makedirs(args.task, exist_ok=True)
+    #     log_writer = SummaryWriter(log_dir=args.task + args.log_dir)
+    # else:
+    #     log_writer = None
+
     if global_rank == 0 and args.log_dir is not None and not args.eval:
-        os.makedirs(args.log_dir, exist_ok=True)
-        log_writer = SummaryWriter(log_dir=args.log_dir + args.task)
+        log_dir = Path(args.task) / args.log_dir
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_writer = SummaryWriter(log_dir=str(log_dir))
     else:
         log_writer = None
 
