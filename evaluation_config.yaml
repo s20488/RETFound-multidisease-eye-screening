@@ -1,14 +1,11 @@
 eval: true
 batch_size: 64
-world_size: 1
+world_size: 4
 model: vit_large_patch16
-epochs: 50  # try deleting it
-blr: 5e-3  # try deleting it
-layer_decay: 0.65  # try deleting it
-weight_decay: 0.05  # try deleting it
-drop_path: 0.2  # try deleting it
-nb_classes: 2
-data_path:
-task: internal_IDRiD/
-resume: finetune_IDRiD/checkpoint-best.pth
+nb_classes: 8
+data_path: ./datasets/ODIR/
+task: ./results/finetune_ODIR/  # specifies the folder for evaluation logs
+resume: ./results/finetune_ODIR/checkpoint-best.pth  # path to the checkpoint
 input_size: 224
+pin_mem: True
+num_workers: 16
