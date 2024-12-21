@@ -234,7 +234,7 @@ def main(args):
     # else:
     #     log_writer = None
 
-    if global_rank == 0 and args.log_dir is not None and not args.eval:
+    if global_rank == 0 and args.task is not None and not args.eval:
         log_dir = Path(args.task) / args.log_dir
         if not log_dir.exists():
             log_dir.mkdir(parents=True, exist_ok=True)
@@ -376,7 +376,7 @@ def main(args):
         if max_auc < val_auc_roc:
             max_auc = val_auc_roc
 
-            if args.output_dir:
+            if args.task:
                 misc.save_model(
                     args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                     loss_scaler=loss_scaler, epoch=epoch)
@@ -390,7 +390,7 @@ def main(args):
                      'epoch': epoch,
                      'n_parameters': n_parameters}
 
-        if args.output_dir and misc.is_main_process():
+        if args.task and misc.is_main_process():
             output_dir = Path(args.task) / args.output_dir
             if not output_dir.exists():
                 output_dir.mkdir(parents=True, exist_ok=True)
@@ -418,9 +418,5 @@ if __name__ == '__main__':
 
     for key, value in config.items():
         setattr(args, key, value)
-
-    if args.output_dir:
-        args.output_dir = Path(args.output_dir)
-        args.output_dir.mkdir(parents=True, exist_ok=True)
 
     main(args)
