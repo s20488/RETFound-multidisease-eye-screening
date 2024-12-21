@@ -32,17 +32,26 @@ def misc_measures(confusion_matrix):
 
     for i in range(1, confusion_matrix.shape[0]):
         cm1 = confusion_matrix[i]
-        acc.append(1. * (cm1[0, 0] + cm1[1, 1]) / np.sum(cm1))
-        sensitivity_ = 1. * cm1[1, 1] / (cm1[1, 0] + cm1[1, 1])
+        acc.append(1. * (cm1[0, 0] + cm1[1, 1]) / np.sum(cm1) if np.sum(cm1) != 0 else 0)
+        sensitivity_ = (1. * cm1[1, 1] / (cm1[1, 0] + cm1[1, 1])) if (cm1[1, 0] + cm1[1, 1]) != 0 else 0
         sensitivity.append(sensitivity_)
-        specificity_ = 1. * cm1[0, 0] / (cm1[0, 1] + cm1[0, 0])
+        specificity_ = (1. * cm1[0, 0] / (cm1[0, 1] + cm1[0, 0])) if (cm1[0, 1] + cm1[0, 0]) != 0 else 0
         specificity.append(specificity_)
-        precision_ = 1. * cm1[1, 1] / (cm1[1, 1] + cm1[0, 1])
+        precision_ = (1. * cm1[1, 1] / (cm1[1, 1] + cm1[0, 1])) if (cm1[1, 1] + cm1[0, 1]) != 0 else 0
         precision.append(precision_)
         G.append(np.sqrt(sensitivity_ * specificity_))
-        F1_score_2.append(2 * precision_ * sensitivity_ / (precision_ + sensitivity_))
-        mcc = (cm1[0, 0] * cm1[1, 1] - cm1[0, 1] * cm1[1, 0]) / np.sqrt(
-            (cm1[0, 0] + cm1[0, 1]) * (cm1[0, 0] + cm1[1, 0]) * (cm1[1, 1] + cm1[1, 0]) * (cm1[1, 1] + cm1[0, 1]))
+        if precision_ + sensitivity_ != 0:
+            F1_score_2.append(2 * precision_ * sensitivity_ / (precision_ + sensitivity_))
+        else:
+            F1_score_2.append(0)
+        denominator = ((cm1[0, 0] + cm1[0, 1]) *
+                       (cm1[0, 0] + cm1[1, 0]) *
+                       (cm1[1, 1] + cm1[1, 0]) *
+                       (cm1[1, 1] + cm1[0, 1]))
+        if denominator != 0:
+            mcc = (cm1[0, 0] * cm1[1, 1] - cm1[0, 1] * cm1[1, 0]) / np.sqrt(denominator)
+        else:
+            mcc = 0
         mcc_.append(mcc)
 
     acc = np.array(acc).mean()
