@@ -390,9 +390,12 @@ def main(args):
                      'n_parameters': n_parameters}
 
         if args.output_dir and misc.is_main_process():
+            output_dir = Path(args.output_dir) / "output_dir"
+            output_dir.mkdir(parents=True, exist_ok=True)
             if log_writer is not None:
                 log_writer.flush()
-            with open(os.path.join(args.output_dir, "log.txt"), mode="a", encoding="utf-8") as f:
+            log_file = output_dir / "log.txt"
+            with log_file.open(mode="a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
 
     total_time = time.time() - start_time
