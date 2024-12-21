@@ -391,7 +391,8 @@ def main(args):
 
         if args.output_dir and misc.is_main_process():
             output_dir = Path(args.task) / args.output_dir
-            output_dir.mkdir(parents=True, exist_ok=True)
+            if not output_dir.exists():
+                output_dir.mkdir(parents=True, exist_ok=True)
             if log_writer is not None:
                 log_writer.flush()
             log_file = output_dir / "log.txt"
