@@ -1,4 +1,4 @@
-batch_size: 512
+batch_size: 256
 accum_iter: 1
 model: vit_large_patch16
 blr: 2.5e-4
