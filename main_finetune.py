@@ -236,7 +236,8 @@ def main(args):
 
     if global_rank == 0 and args.log_dir is not None and not args.eval:
         log_dir = Path(args.task) / args.log_dir
-        log_dir.mkdir(parents=True, exist_ok=True)
+        if not log_dir.exists():
+            log_dir.mkdir(parents=True, exist_ok=True)
         log_writer = SummaryWriter(log_dir=str(log_dir))
     else:
         log_writer = None
