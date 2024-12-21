@@ -408,6 +408,7 @@ if __name__ == '__main__':
         setattr(args, key, value)
 
     if args.output_dir:
-        Path(args.output_dir).mkdir(parents=True, exist_ok=True)
+        args.output_dir = Path(args.output_dir)
+        args.output_dir.mkdir(parents=True, exist_ok=True)
 
     main(args)
