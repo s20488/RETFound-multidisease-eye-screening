@@ -381,7 +381,10 @@ def main(args):
                     loss_scaler=loss_scaler, epoch=epoch)
 
         if args.task:
-            checkpoint_path = f"{args.task}/checkpoints/checkpoint-epoch{epoch}.pth"
+            checkpoint_dir = os.path.join(args.task, "checkpoints")
+            os.makedirs(checkpoint_dir, exist_ok=True)
+
+            checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint-epoch{epoch}.pth")
             torch.save({
                 'model': model.state_dict(),
                 'optimizer': optimizer.state_dict(),
