@@ -326,8 +326,31 @@ def main(args):
     misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
     if args.eval:
-        test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
-                                       num_class=args.nb_classes)
+        checkpoints_path = Path(args.task) / "checkpoints"
+        checkpoints = sorted(checkpoints_path.glob("checkpoint-epoch*.pth"))
+
+        for checkpoint_file in checkpoints:
+            args.resume = str(checkpoint_file)
+            misc.load_model(args=args, model_without_ddp=model, optimizer=optimizer, loss_scaler=loss_scaler)
+            epoch = checkpoint_file.stem.split("-")[-1]
+
+            test_stats, test_auc_roc = evaluate(
+                data_loader_test, model, device, args.task, epoch=epoch, mode='test', num_class=args.nb_classes
+            )
+
+            log_stats = {
+                'epoch': epoch,
+                'test_auc_roc': test_auc_roc,
+                **{f'test_{k}': v for k, v in test_stats.items()},
+            }
+
+            output_dir = Path(args.task) / "evaluation_logs"
+            output_dir.mkdir(parents=True, exist_ok=True)
+            log_file = output_dir / "test_log.txt"
+            with log_file.open(mode="a", encoding="utf-8") as f:
+                f.write(json.dumps(log_stats) + "\n")
+
+            print(f"Logged test results for epoch {epoch}.")
         exit(0)
 
     print(f"Start training for {args.epochs} epochs")
@@ -354,6 +377,15 @@ def main(args):
                 misc.save_model(
                     args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                     loss_scaler=loss_scaler, epoch=epoch)
+
+        if args.task:
+            checkpoint_path = f"{args.task}/checkpoints/checkpoint-epoch{epoch}.pth"
+            torch.save({
+                'model': model.state_dict(),
+                'optimizer': optimizer.state_dict(),
+                'epoch': epoch,
+                'scaler': loss_scaler.state_dict(),
+            }, checkpoint_path)
 
         if log_writer is not None:
             log_writer.add_scalar('perf/val_acc1', val_stats['acc1'], epoch)
