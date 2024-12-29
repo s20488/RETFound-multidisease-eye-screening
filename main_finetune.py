@@ -327,6 +327,8 @@ def main(args):
 
     if args.eval:
         checkpoints_path = Path(args.task) / "checkpoints"
+        checkpoints_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+
         checkpoints = sorted(checkpoints_path.glob("checkpoint-epoch*.pth"))
 
         for checkpoint_file in checkpoints:
@@ -345,7 +347,7 @@ def main(args):
             }
 
             output_dir = Path(args.task) / "evaluation_logs"
-            output_dir.mkdir(parents=True, exist_ok=True)
+            output_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
             log_file = output_dir / "test_log.txt"
             with log_file.open(mode="a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
