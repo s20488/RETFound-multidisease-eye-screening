@@ -346,8 +346,8 @@ def main(args):
                 **{f'test_{k}': v for k, v in test_stats.items()},
             }
 
-            output_dir = Path(args.task) / "evaluation_logs"
-            output_dir.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+            output_dir = Path(args.task) / "test_logs"
+            output_dir.mkdir(parents=True, exist_ok=True)
             log_file = output_dir / "test_log.txt"
             with log_file.open(mode="a", encoding="utf-8") as f:
                 f.write(json.dumps(log_stats) + "\n")
