@@ -3,6 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.metrics import roc_curve, auc
 
+
 @torch.no_grad()
 def plot_roc_curve(data_loader, model, device, num_class):
     """
