@@ -331,7 +331,7 @@ def main(args):
 
         checkpoints = sorted(
             checkpoints_path.glob("checkpoint-epoch*.pth"),
-            key=lambda x: int(x.stem.split("-")[-1])
+            key=lambda x: int(x.stem.replace("checkpoint-epoch", ""))
         )
 
         for checkpoint_file in checkpoints:
@@ -427,8 +427,8 @@ if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
 
-    config = load_config('training_config.yaml')
-    #config = load_config('evaluation_config.yaml')  # for evaluation only
+    #config = load_config('training_config.yaml')
+    config = load_config('evaluation_config.yaml')  # for evaluation only
 
     for key, value in config.items():
         setattr(args, key, value)
