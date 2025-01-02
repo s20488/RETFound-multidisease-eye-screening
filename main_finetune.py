@@ -329,7 +329,10 @@ def main(args):
         checkpoints_path = Path(args.task) / "checkpoints"
         checkpoints_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
 
-        checkpoints = sorted(checkpoints_path.glob("checkpoint-epoch*.pth"))
+        checkpoints = sorted(
+            checkpoints_path.glob("checkpoint-epoch*.pth"),
+            key=lambda x: int(x.stem.split("-")[-1])
+        )
 
         for checkpoint_file in checkpoints:
             args.resume = str(checkpoint_file)
