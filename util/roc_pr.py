@@ -1,3 +1,4 @@
+import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
@@ -5,9 +6,9 @@ from sklearn.metrics import roc_curve, auc
 
 
 @torch.no_grad()
-def plot_roc_curve(data_loader, model, device, num_class):
+def plot_roc_curve(data_loader, model, device, num_class, save_path="roc_curve.png"):
     """
-    Function to plot ROC curve using model predictions.
+    Function to plot ROC curve using model predictions and save the result.
     """
     model.eval()
     true_labels = []
@@ -57,4 +58,8 @@ def plot_roc_curve(data_loader, model, device, num_class):
     plt.title('ROC Curve')
     plt.legend(loc='lower right')
     plt.grid()
-    plt.show()
+
+    # Save the plot
+    os.makedirs(os.path.dirname(save_path), exist_ok=True)  # Ensure directory exists
+    plt.savefig(save_path, dpi=300, bbox_inches='tight')
+    plt.close()
