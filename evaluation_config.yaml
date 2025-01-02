@@ -5,7 +5,7 @@ model: vit_large_patch16
 nb_classes: 4
 data_path: ./datasets/Kaggle/
 task: ./results/finetune_Kaggle/  # specifies the folder for evaluation logs
-resume: ./results/finetune_REFUGE22/checkpoint-best.pth
+resume: ./results/finetune_Kaggle/checkpoint-best.pth
 input_size: 224
 pin_mem: True
 num_workers: 24
