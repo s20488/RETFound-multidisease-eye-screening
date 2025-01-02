@@ -206,4 +206,3 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         plt.savefig(task+'confusion_matrix_test.jpg',dpi=600,bbox_inches ='tight')
 
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
-
