@@ -19,6 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 import timm
 
+from util.roc_pr import plot_roc_curve
+
 assert timm.__version__ == "0.3.2"  # version check
 from timm.models.layers import trunc_normal_
 from timm.data.mixup import Mixup
@@ -326,36 +328,10 @@ def main(args):
     misc.load_model(args=args, model_without_ddp=model_without_ddp, optimizer=optimizer, loss_scaler=loss_scaler)
 
     if args.eval:
-        checkpoints_path = Path(args.task) / "checkpoints"
-        checkpoints_path.mkdir(parents=True, exist_ok=True)  # Ensure the directory exists
+        test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
+                                       num_class=args.nb_classes)
 
-        checkpoints = sorted(
-            checkpoints_path.glob("checkpoint-epoch*.pth"),
-            key=lambda x: int(x.stem.replace("checkpoint-epoch", ""))
-        )
-
-        for checkpoint_file in checkpoints:
-            args.resume = str(checkpoint_file)
-            misc.load_model(args=args, model_without_ddp=model, optimizer=optimizer, loss_scaler=loss_scaler)
-            epoch = checkpoint_file.stem.split("-")[-1]
-
-            test_stats, test_auc_roc = evaluate(
-                data_loader_test, model, device, args.task, epoch=epoch, mode='test', num_class=args.nb_classes
-            )
-
-            log_stats = {
-                'epoch': epoch,
-                'test_auc_roc': test_auc_roc,
-                **{f'test_{k}': v for k, v in test_stats.items()},
-            }
-
-            output_dir = Path(args.task) / "test_logs"
-            output_dir.mkdir(parents=True, exist_ok=True)
-            log_file = output_dir / "test_log.txt"
-            with log_file.open(mode="a", encoding="utf-8") as f:
-                f.write(json.dumps(log_stats) + "\n")
-
-            print(f"Logged test results for epoch {epoch}.")
+        plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes)
         exit(0)
 
     print(f"Start training for {args.epochs} epochs")
@@ -419,8 +395,6 @@ def main(args):
     print('Training time {}'.format(total_time_str))
     state_dict_best = torch.load(args.task + 'checkpoint-best.pth', map_location='cpu')
     model_without_ddp.load_state_dict(state_dict_best['model'])
-    test_stats, auc_roc = evaluate(data_loader_test, model_without_ddp, device, args.task, epoch=0, mode='test',
-                                   num_class=args.nb_classes)
 
 
 if __name__ == '__main__':
