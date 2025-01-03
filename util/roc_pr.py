@@ -6,9 +6,9 @@ from sklearn.metrics import roc_curve, auc
 
 
 @torch.no_grad()
-def plot_roc_curve(data_loader, model, device, num_class, save_path="roc_curve.png"):
+def plot_roc_curve(data_loader, model, device, num_class, task):
     """
-    Function to plot ROC curve using model predictions and save the result.
+    Function to plot ROC curve using model predictions and save the result in the task directory.
     """
     model.eval()
     true_labels = []
@@ -59,7 +59,12 @@ def plot_roc_curve(data_loader, model, device, num_class, save_path="roc_curve.p
     plt.legend(loc='lower right')
     plt.grid()
 
+    # Ensure the task path exists
+    os.makedirs(task, exist_ok=True)
+
     # Save the plot
-    os.makedirs(os.path.dirname(save_path), exist_ok=True)  # Ensure directory exists
+    save_path = os.path.join(task, "roc_curve.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
+
+    print(f"ROC curve saved at: {save_path}")

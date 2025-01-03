@@ -331,7 +331,7 @@ def main(args):
         test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
                                        num_class=args.nb_classes)
 
-        plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes)
+        plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         exit(0)
 
     print(f"Start training for {args.epochs} epochs")
