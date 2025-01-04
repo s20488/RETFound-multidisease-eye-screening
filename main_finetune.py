@@ -19,7 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import timm
 
-from util.roc_pr import plot_roc_curve
+from util.roc_pr import plot_roc_curve, plot_pr_curve
 
 assert timm.__version__ == "0.3.2"  # version check
 from timm.models.layers import trunc_normal_
@@ -332,6 +332,7 @@ def main(args):
                                        num_class=args.nb_classes)
 
         plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
+        plot_pr_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         exit(0)
 
     print(f"Start training for {args.epochs} epochs")
