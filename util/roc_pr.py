@@ -63,7 +63,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random classifier')
     plt.xlabel('1 - Specificity')
     plt.ylabel('Sensitivity')
-    plt.legend(loc='lower right')
+    plt.legend(loc='lower right', fontsize='small')
     plt.grid()
 
     os.makedirs(task, exist_ok=True)
