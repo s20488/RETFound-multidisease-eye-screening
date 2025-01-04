@@ -11,6 +11,12 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     true_labels = []
     predicted_probs = []
 
+    dataset = data_loader.dataset
+    if hasattr(dataset, 'classes'):
+        class_names = dataset.classes
+    else:
+        class_names = [f'Class {i}' for i in range(num_class)]
+
     for batch in data_loader:
         images = batch[0].to(device, non_blocking=True)
         targets = batch[-1].to(device, non_blocking=True)
@@ -50,7 +56,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
 
     plt.figure()
     for i in range(num_class):
-        plt.plot(fpr[i], tpr[i], label=f'Class {i} (AUC = {roc_auc[i]:.2f})')
+        plt.plot(fpr[i], tpr[i], label=f'{class_names[i]} (AUC = {roc_auc[i]:.2f})')  # Use class names
 
     plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
     plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
@@ -61,7 +67,6 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     plt.grid()
 
     os.makedirs(task, exist_ok=True)
-
     save_path = os.path.join(task, "roc_curve.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
     plt.close()
