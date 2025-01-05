@@ -129,7 +129,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     plt.xlabel('Recall')
     plt.ylabel('Precision')
-    plt.title('Precision-Recall Curve')
     plt.legend(loc='lower left', fontsize='small')
     plt.grid()
 
