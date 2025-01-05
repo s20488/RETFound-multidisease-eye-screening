@@ -360,18 +360,6 @@ def main(args):
                     args=args, model=model, model_without_ddp=model_without_ddp, optimizer=optimizer,
                     loss_scaler=loss_scaler, epoch=epoch)
 
-        if args.task:
-            checkpoint_dir = os.path.join(args.task, "checkpoints")
-            os.makedirs(checkpoint_dir, exist_ok=True)
-
-            checkpoint_path = os.path.join(checkpoint_dir, f"checkpoint-epoch{epoch}.pth")
-            torch.save({
-                'model': model.state_dict(),
-                'optimizer': optimizer.state_dict(),
-                'epoch': epoch,
-                'scaler': loss_scaler.state_dict(),
-            }, checkpoint_path)
-
         if log_writer is not None:
             log_writer.add_scalar('perf/val_acc1', val_stats['acc1'], epoch)
             log_writer.add_scalar('perf/val_auc', val_auc_roc, epoch)  # auc-roc
