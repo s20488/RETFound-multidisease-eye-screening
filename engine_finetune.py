@@ -201,7 +201,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
             wf.writerow(i)
 
     if mode == 'test':
-        # Преобразуем в массивы NumPy, чтобы избежать ошибок индексирования
+        # Преобразование списков в массивы NumPy
         true_label_onehot_array = np.array(true_label_onehot_list)
         prediction_array = np.array(prediction_list)
 
@@ -224,8 +224,13 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
                 class_specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
                 class_precision = tp / (tp + fp) if (tp + fp) > 0 else 0
                 class_f1 = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0
-                class_mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if ((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) > 0 else 0
+                class_mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if ((
+                                                                                                                             tp + fp) * (
+                                                                                                                             tp + fn) * (
+                                                                                                                             tn + fp) * (
+                                                                                                                             tn + fn)) > 0 else 0
 
+                # Используем преобразованные массивы вместо списков
                 class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
                     np.unique(true_label_onehot_array[:, i])) > 1 else 0
                 class_auc_pr = average_precision_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
@@ -233,5 +238,8 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
 
                 wf.writerow([i, (tp + tn) / (tp + tn + fp + fn), class_sensitivity, class_specificity, class_precision,
                              class_auc_roc, class_auc_pr, class_f1, class_mcc])
+
+                print(type(true_label_onehot_list), len(true_label_onehot_list))
+                print(type(prediction_list), len(prediction_list))
 
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
