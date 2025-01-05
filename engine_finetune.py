@@ -205,4 +205,26 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         cm.plot(cmap=plt.cm.Blues,number_label=True,normalized=True,plot_lib="matplotlib")
         plt.savefig(task+'confusion_matrix_test.jpg',dpi=600,bbox_inches ='tight')
 
+        # calculate metrics per class
+        class_metrics_path = task + '_class_metrics_test.csv'
+        with open(class_metrics_path, mode='a', newline='', encoding='utf8') as cfa:
+            wf = csv.writer(cfa)
+            wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC', 'AUC-PR', 'F1', 'MCC'])
+            for i in range(num_class):
+                tp = confusion_matrix[i][1][1]
+                tn = confusion_matrix[i][0][0]
+                fp = confusion_matrix[i][0][1]
+                fn = confusion_matrix[i][1][0]
+
+                class_sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+                class_specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+                class_precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+                class_f1 = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0
+                class_mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if ((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) > 0 else 0
+
+                class_auc_roc = roc_auc_score(true_label_onehot_list[:, i], prediction_list[:, i]) if len(np.unique(true_label_onehot_list[:, i])) > 1 else 0
+                class_auc_pr = average_precision_score(true_label_onehot_list[:, i], prediction_list[:, i]) if len(np.unique(true_label_onehot_list[:, i])) > 1 else 0
+
+                wf.writerow([i, (tp + tn) / (tp + tn + fp + fn), class_sensitivity, class_specificity, class_precision, class_auc_roc, class_auc_pr, class_f1, class_mcc])
+
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
