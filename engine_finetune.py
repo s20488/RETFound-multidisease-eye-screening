@@ -215,7 +215,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
         # Calculate metrics per class
-        class_metrics_path = task + '_metrics_test.csv'
+        class_metrics_path = task + '_class_metrics_test.csv'
         with open(class_metrics_path, mode='a', newline='', encoding='utf8') as cfa:
             wf = csv.writer(cfa)
             wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC', 'AUC-PR', 'F1', 'MCC'])
