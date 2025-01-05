@@ -148,3 +148,6 @@ finetune_IDRiD
 
 # Datasets Jupyter processing
 /datasets_processing/
+
+evaluation_config.yaml
+training_config.yaml
