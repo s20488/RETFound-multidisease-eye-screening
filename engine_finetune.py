@@ -17,6 +17,7 @@ import util.misc as misc
 import util.lr_sched as lr_sched
 from sklearn.metrics import roc_auc_score, average_precision_score,multilabel_confusion_matrix
 from pycm import *
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -215,9 +216,9 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         true_label_onehot_array = np.array(true_label_onehot_list)
         prediction_array = np.array(prediction_list)
 
-        cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
-        cm.labels = {i: class_name for i, class_name in enumerate(class_names)}
-        cm.plot(cmap=plt.cm.Blues, number_label=True, normalized=True, plot_lib="matplotlib")
+        cm_array = confusion_matrix(true_label_decode_list, prediction_decode_list)
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm_array, display_labels=class_names)
+        disp.plot(cmap=plt.cm.Blues, values_format=".2f")
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
         # Calculate metrics per class
