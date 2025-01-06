@@ -1,11 +1,11 @@
 eval: true
 batch_size: 16
-world_size: 4
+world_size: 1
 model: vit_large_patch16
-nb_classes: 8
-data_path: ./datasets/ODIR/
-task: ./results/finetune_ODIR/  # specifies the folder for evaluation logs
-resume: ./results/finetune_ODIR/checkpoint-best.pth
+nb_classes: 2
+data_path: ./datasets/REFUGE2/
+task: ./results/finetune_REFUGE2/  # specifies the folder for evaluation logs
+resume: ./results/finetune_REFUGE2/checkpoint-best.pth  # path to the checkpoint
 input_size: 224
 pin_mem: True
 num_workers: 24

@@ -1,25 +1,25 @@
-batch_size: 16                    # Уменьшение батча для частого обновления весов на редких примерах
-accum_iter: 4                     # Накопление градиентов для компенсации малого батча
+batch_size: 16
+accum_iter: 1
 model: vit_large_patch16
-blr: 1.0e-4                       # Более низкая скорость обучения для стабильности
-layer_decay: 0.85                 # Усиление адаптации верхних слоев
-weight_decay: 0.005               # Снижение регуляризации для учета редких классов
-epochs: 70                        # Увеличение числа эпох для лучшего обучения редких классов
-warmup_epochs: 5                  # Укороченный разогрев для быстрого начала обучения
-drop_path: 0.3                    # Баланс регуляризации для предотвращения переобучения
-smoothing: 0.0                    # Отключение сглаживания меток для сохранения истинных меток
-color_jitter: 0.2                 # Усиление аугментации
+blr: 2.0e-4
+layer_decay: 0.9
+weight_decay: 0.005
+epochs: 50
+warmup_epochs: 3
+drop_path: 0.3
+smoothing: 0.0
+color_jitter: 0.3
 aa: 'rand-m9-mstd0.5-inc1'
-reprob: 0.3                       # Усиление регуляризации через обнуление пикселей
-mixup: 0.0                        # Отключение смешивания для сохранения целостности редких классов
-cutmix: 0.0                       # Аналогично для предотвращения изменения редких классов
-mixup_prob: 0.0                   # Полное отключение смешивания
+reprob: 0.2
+mixup: 0.0
+cutmix: 0.0
+mixup_prodb: 0.0
 mixup_mode: 'batch'
-nb_classes: 8
+nb_classes: 2
 input_size: 224
-num_workers: 16
+num_workers: 24
 world_size: 1
 pin_mem: True
-data_path: ./datasets/ODIR/
-task: ./results/finetune_ODIR/  # specifies the folder for logs and checkpoints
+data_path: ./datasets/REFUGE2/
+task: ./results/finetune_REFUGE2/  # specifies the folder for logs and checkpoints
 finetune: ./RETFound_cfp_weights.pth  # RETFound pre-trained weights for colour fundus image
