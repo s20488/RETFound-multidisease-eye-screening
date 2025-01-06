@@ -15,7 +15,7 @@ from timm.utils import accuracy
 from typing import Iterable, Optional
 import util.misc as misc
 import util.lr_sched as lr_sched
-from sklearn.metrics import roc_auc_score, average_precision_score,multilabel_confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score, multilabel_confusion_matrix, ConfusionMatrixDisplay
 from pycm import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -210,10 +210,13 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         true_label_onehot_array = np.array(true_label_onehot_list)
         prediction_array = np.array(prediction_list)
 
-        cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
-        cm.labels = class_names
-        cm.plot(cmap=plt.cm.Blues, number_label=True, normalized=True, plot_lib="matplotlib")
-        plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
+        ml_cm = multilabel_confusion_matrix(true_label_decode_list, prediction_decode_list, labels=range(num_class))
+
+        for i, cm in enumerate(ml_cm):
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=[f'Not {class_names[i]}', class_names[i]])
+            disp.plot(cmap=plt.cm.Blues, values_format=".2f")
+            plt.title(f'Confusion Matrix for Class {class_names[i]}')
+            plt.savefig(task + f'_confusion_matrix_class_{i}.jpg', dpi=600, bbox_inches='tight')
 
         # Calculate metrics per class
         class_metrics_path = task + '_class_metrics_test.csv'
