@@ -184,19 +184,24 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     # gather the stats from all processes
     true_label_decode_list = np.array(true_label_decode_list)
     prediction_decode_list = np.array(prediction_decode_list)
-    confusion_matrix = multilabel_confusion_matrix(true_label_decode_list, prediction_decode_list,labels=[i for i in range(num_class)])
-    acc, sensitivity, specificity, precision, G, F1, mcc = misc_measures(confusion_matrix)
+    multi_cm = multilabel_confusion_matrix(true_label_decode_list, prediction_decode_list,
+                                           labels=[i for i in range(num_class)])
 
-    auc_roc = roc_auc_score(true_label_onehot_list, prediction_list,multi_class='ovr',average='macro')
-    auc_pr = average_precision_score(true_label_onehot_list, prediction_list,average='macro')
+    acc, sensitivity, specificity, precision, G, F1, mcc = misc_measures(multi_cm)
+
+    auc_roc = roc_auc_score(true_label_onehot_list, prediction_list, multi_class='ovr', average='macro')
+    auc_pr = average_precision_score(true_label_onehot_list, prediction_list, average='macro')
 
     metric_logger.synchronize_between_processes()
 
-    print('Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'.format(acc, auc_roc, auc_pr, F1, mcc))
-    results_path = task+'_metrics_{}.csv'.format(mode)
-    with open(results_path,mode='a',newline='',encoding='utf8') as cfa:
+    print(
+        'Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'.format(acc, auc_roc,
+                                                                                                           auc_pr, F1,
+                                                                                                           mcc))
+    results_path = task + '_metrics_{}.csv'.format(mode)
+    with open(results_path, mode='a', newline='', encoding='utf8') as cfa:
         wf = csv.writer(cfa)
-        data2=[[acc,sensitivity,specificity,precision,auc_roc,auc_pr,F1,mcc,metric_logger.loss]]
+        data2 = [[acc, sensitivity, specificity, precision, auc_roc, auc_pr, F1, mcc, metric_logger.loss]]
         for i in data2:
             wf.writerow(i)
 
@@ -211,6 +216,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         prediction_array = np.array(prediction_list)
 
         cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
+        cm.labels = class_names
         cm.plot(cmap=plt.cm.Blues, number_label=True, normalized=True, plot_lib="matplotlib")
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
@@ -220,10 +226,10 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
             wf = csv.writer(cfa)
             wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC', 'AUC-PR', 'F1', 'MCC'])
             for i in range(num_class):
-                tp = confusion_matrix[i][1][1]
-                tn = confusion_matrix[i][0][0]
-                fp = confusion_matrix[i][0][1]
-                fn = confusion_matrix[i][1][0]
+                tp = multi_cm[i][1][1]
+                tn = multi_cm[i][0][0]
+                fp = multi_cm[i][0][1]
+                fn = multi_cm[i][1][0]
 
                 class_sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
                 class_specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
