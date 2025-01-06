@@ -216,7 +216,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         prediction_array = np.array(prediction_list)
 
         cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
-        cm.labels = class_names
+        cm.labels = {i: class_name for i, class_name in enumerate(class_names)}
         cm.plot(cmap=plt.cm.Blues, number_label=True, normalized=True, plot_lib="matplotlib")
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
