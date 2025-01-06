@@ -15,7 +15,7 @@ from timm.utils import accuracy
 from typing import Iterable, Optional
 import util.misc as misc
 import util.lr_sched as lr_sched
-from sklearn.metrics import roc_auc_score, average_precision_score,multilabel_confusion_matrix
+from sklearn.metrics import roc_auc_score, average_precision_score, multilabel_confusion_matrix, ConfusionMatrixDisplay
 from pycm import *
 import matplotlib.pyplot as plt
 import numpy as np
@@ -211,7 +211,8 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         prediction_array = np.array(prediction_list)
 
         cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
-        cm.plot(cmap=plt.cm.Blues, number_label=True, normalized=True, plot_lib="matplotlib")
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=class_names)
+        disp.plot(cmap=plt.cm.Blues, values_format=".2f")
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
         # Calculate metrics per class
