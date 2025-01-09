@@ -147,7 +147,15 @@ internal_IDRiD
 finetune_IDRiD
 
 # Datasets Jupyter processing
-/datasets_processing/
+/datasets_processing/ADAM
+/datasets_processing/bialostok_examples
+/datasets_processing/HHR
+/datasets_processing/IDRiD
+/datasets_processing/Kaggle
+/datasets_processing/MESSIDOR-2
+/datasets_processing/ODIR
+/datasets_processing/ORIGA
+/datasets_processing/REFUGE2
 
 evaluation_config.yaml
 training_config.yaml

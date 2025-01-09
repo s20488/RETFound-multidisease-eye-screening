@@ -19,7 +19,7 @@ from torch.utils.tensorboard import SummaryWriter
 
 import timm
 
-from util.roc_pr import plot_roc_curve, plot_pr_curve
+from util.roc_pr_curve import plot_roc_curve, plot_pr_curve
 
 assert timm.__version__ == "0.3.2"  # version check
 from timm.models.layers import trunc_normal_

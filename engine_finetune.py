@@ -219,6 +219,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         cm_array = confusion_matrix(true_label_decode_list, prediction_decode_list, normalize="true")
         disp = ConfusionMatrixDisplay(confusion_matrix=cm_array, display_labels=class_names)
         disp.plot(cmap=plt.cm.Blues, values_format=".5f")
+        plt.title("Confusion Matrix - Kaggle")
         plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
 
         # Calculate metrics per class
