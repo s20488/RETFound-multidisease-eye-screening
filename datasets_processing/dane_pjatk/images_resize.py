@@ -1,7 +1,7 @@
 import os
 import pydicom
-from PIL import Image
 from torchvision import transforms
+from PIL import Image
 
 
 def remove_black_borders(image, border_fraction):
