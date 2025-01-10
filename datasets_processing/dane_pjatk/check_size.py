@@ -9,35 +9,22 @@ def check_image_sizes(directory, expected_size=(3456, 5184)):
     :param directory: Путь к директории с DICOM-файлами.
     :param expected_size: Ожидаемый размер изображений (высота, ширина).
     """
-    mismatched_files = []  # Список файлов с несоответствующим размером
     error_files = []  # Файлы, которые не удалось обработать
 
     for filename in os.listdir(directory):
         if filename.endswith(".dcm"):  # Проверяем только DICOM-файлы
             file_path = os.path.join(directory, filename)
             try:
-                ds = pydicom.dcmread(file_path)
-                image_array = ds.pixel_array
+                # Читаем только заголовки DICOM для ускорения
+                ds = pydicom.dcmread(file_path, stop_before_pixels=True)
+                rows = int(ds.get("Rows", 0))
+                cols = int(ds.get("Columns", 0))
 
-                # Вывод размера текущего изображения
-                print(f"Файл: {filename}, Размер: {image_array.shape}")
-
-                if image_array.shape != expected_size:
-                    mismatched_files.append((filename, image_array.shape))
+                # Проверяем размеры и выводим только отличающиеся
+                if (rows, cols) != expected_size:
+                    print(f"Файл: {filename}, Размер: ({rows}, {cols})")
             except Exception as e:
                 error_files.append((filename, str(e)))
-
-    if mismatched_files:
-        print("\nНайдены изображения с несоответствующим размером:")
-        for file, size in mismatched_files:
-            print(f"Файл: {file}, Размер: {size}")
-    else:
-        print(f"\nВсе изображения имеют ожидаемый размер: {expected_size}")
-
-    if error_files:
-        print("\nФайлы с ошибками обработки:")
-        for file, error in error_files:
-            print(f"Файл: {file}, Ошибка: {error}")
 
 
 # Путь к директории с DICOM-изображениями
