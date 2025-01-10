@@ -8,6 +8,9 @@ import pandas as pd
 
 sys.path.append('/mnt/data/Anastasiia_Ponkratova/RETFound_MAE')
 
+# Определяем устройство (GPU или CPU)
+device = torch.device("cuda")
+
 
 # Подготовка модели
 def prepare_model(chkpt_dir, arch='vit_large_patch16'):
@@ -15,10 +18,11 @@ def prepare_model(chkpt_dir, arch='vit_large_patch16'):
         img_size=224,
         num_classes=4,
         drop_path_rate=0,
-        global_pool=True,
+        global_pool=None,
     )
-    checkpoint = torch.load(chkpt_dir, map_location='cpu')
+    checkpoint = torch.load(chkpt_dir, map_location=device)
     model.load_state_dict(checkpoint['model'], strict=False)
+    model.to(device)
     model.eval()
     return model
 
@@ -34,9 +38,9 @@ def extract_features_from_png(image_path, model):
         transforms.ToTensor(),
         transforms.Normalize(mean=[0.73126347, 0.42223816, 0.26234768], std=[0.1707951, 0.16099306, 0.13655258]),
     ])
-    image = transform(image).unsqueeze(0)
+    image = transform(image).unsqueeze(0).to(device)
     with torch.no_grad():
-        features = model(image).squeeze().numpy()
+        features = model(image).squeeze().cpu().numpy()
     return features
 
 
@@ -46,8 +50,11 @@ png_paths = [os.path.join(png_folder, fname) for fname in os.listdir(png_folder)
 
 image_features = []
 for png_path in png_paths:
-    features = extract_features_from_png(png_path, model)
-    image_features.append({"image_path": png_path, "features": features})
+    try:
+        features = extract_features_from_png(png_path, model)
+        image_features.append({"image_path": png_path, "features": features})
+    except Exception as e:
+        print(f"Ошибка при обработке файла {png_path}: {e}")
 
 # Преобразуем в DataFrame
 image_features_df = pd.DataFrame(image_features)
@@ -66,9 +73,10 @@ if final_data.isnull().any().any():
     print("Есть строки без соответствующих биомаркеров! Проверьте данные.")
 
 # Разворачиваем признаки изображений в отдельные столбцы
-feature_columns = [f"feature_{i}" for i in range(len(image_features_df['features'].iloc[0]))]
-final_features = pd.DataFrame(final_data["features"].tolist(), columns=feature_columns)
-final_data = pd.concat([final_data.drop(columns=["features"]), final_features], axis=1)
+if not image_features_df.empty:
+    feature_columns = [f"feature_{i}" for i in range(len(image_features_df['features'].iloc[0]))]
+    final_features = pd.DataFrame(final_data["features"].tolist(), columns=feature_columns)
+    final_data = pd.concat([final_data.drop(columns=["features"]), final_features], axis=1)
 
 # Сохраняем результат
 final_data.to_csv("final_data_with_image_features.csv", index=False)
