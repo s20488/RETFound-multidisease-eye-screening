@@ -1,9 +1,11 @@
-import os
-import torch
+import sys
 from torchvision import transforms
 from PIL import Image
+import torch
 import models_vit
 import pandas as pd
+
+sys.path.append('/mnt/data/Anastasiia_Ponkratova/RETFound_MAE')
 
 
 # Подготовка модели
