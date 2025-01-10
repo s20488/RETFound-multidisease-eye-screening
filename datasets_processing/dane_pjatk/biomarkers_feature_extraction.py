@@ -1,6 +1,9 @@
 import pandas as pd
+import re
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from gensim.models import FastText
+import numpy as np
 
 # Загрузка данных
 data = pd.read_excel("C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/hypertension_clustering.xlsx")
@@ -12,7 +15,7 @@ original_columns = set(data.columns)
 participant_id = data["participant_id"]
 data = data.drop(columns=["participant_id"])
 
-# Определяем категориальные и числовые данные
+# Определяем категориальные, числовые и текстовые данные
 categorical_columns = ["gender", "intm_w10_1", "intm_w10_2", "intm_w10_3", "intm_w10_5",
                        "intm_w10_6", "intm_w10_7", "intm_w10_8", "intm_w10_9", "intm_w10_11",
                        "intm_w10_12", "intm_sn1_1", "intm_sn1_3", "intm_sn1_5", "intm_sn13",
@@ -24,6 +27,8 @@ categorical_columns = ["gender", "intm_w10_1", "intm_w10_2", "intm_w10_3", "intm
                        "aha_bfzusatz", "aha_faf", "aha_nerv_li", "aha_bfnerv_li", "aha_maku_li",
                        "aha_bfmaku_li", "aha_netz_li", "aha_bfnetz_li", "aha_ve_ar_li",
                        "aha_bf_ve_ar_li", "aha_bfzusatz_li", "aha_faf_li"]
+
+text_columns = ["aha_bfnote", "aha_bfnote_li"]
 
 numerical_columns = [
     "CASP-3_OID00630", "FAS_OID00615", "IL-6RA_OID00602", "LDL receptor_OID00564",
@@ -56,7 +61,25 @@ numerical_columns = [
     "R_NT_CorrectedIOP_Corrected_mmHg", "R_PACHY_PACHYAverage_Thickness"
 ]
 
-# Обработка пропусков
+
+# --- ПРЕДОБРАБОТКА ТЕКСТА ---
+def clean_text(text):
+    """
+    Очищает текст: убирает пунктуацию, приводит к нижнему регистру, удаляет лишние пробелы.
+    """
+    if pd.isna(text):  # Если текст отсутствует, возвращаем пустую строку
+        return ""
+    text = text.lower()  # Приведение к нижнему регистру
+    text = re.sub(r"[^\w\s]", "", text)  # Удаление пунктуации
+    text = re.sub(r"\s+", " ", text)  # Удаление лишних пробелов
+    return text.strip()
+
+
+# Применение очистки ко всем текстовым колонкам
+for column in text_columns:
+    data[column] = data[column].apply(clean_text)
+
+# --- ОБРАБОТКА ПРОПУСКОВ ---
 cat_imputer = SimpleImputer(strategy="most_frequent")
 data[categorical_columns] = cat_imputer.fit_transform(data[categorical_columns])
 
@@ -66,22 +89,60 @@ data[numerical_columns] = num_imputer.fit_transform(data[numerical_columns])
 # Преобразование категориальных данных в строки
 data[categorical_columns] = data[categorical_columns].astype(str)
 
-# Масштабирование числовых данных
+# --- ОБРАБОТКА ЧИСЛОВЫХ ДАННЫХ ---
 scaler = StandardScaler()
 data[numerical_columns] = scaler.fit_transform(data[numerical_columns])
 
-# Кодирование категориальных данных
+# --- КОДИРОВАНИЕ КАТЕГОРИАЛЬНЫХ ДАННЫХ ---
 encoder = OneHotEncoder(sparse_output=False, handle_unknown="ignore")
-
 encoded_categorical = pd.DataFrame(
     encoder.fit_transform(data[categorical_columns]),
     columns=encoder.get_feature_names_out(categorical_columns),
     index=data.index
 )
 
-# Объединяем данные
-processed_data = pd.concat([data[numerical_columns], encoded_categorical], axis=1)
+
+# --- ОБРАБОТКА ТЕКСТА С ПОМОЩЬЮ FASTTEXT ---
+def prepare_text_embeddings(data, text_columns):
+    """
+    Создаёт FastText-эмбеддинги для указанных текстовых колонок.
+    """
+    tokenized_texts = data[text_columns].fillna("").apply(lambda x: x.str.split())
+
+    # Проверяем, есть ли хоть какие-то токены
+    sentences = tokenized_texts.sum().tolist()
+    if not any(sentences):
+        raise ValueError("Нет доступного текста для обучения модели.")
+
+    # Обучение модели FastText
+    model = FastText(sentences=sentences, vector_size=100, min_count=1, window=3, sg=1)
+
+    # Создание эмбеддингов
+    text_embeddings = []
+    for column in text_columns:
+        column_embeddings = tokenized_texts[column].apply(
+            lambda tokens: model.wv[tokens].mean(axis=0) if tokens else np.zeros(100)
+        )
+        column_embeddings = pd.DataFrame(
+            column_embeddings.tolist(),
+            index=data.index,
+            columns=[f"{column}_emb_{i}" for i in range(100)]
+        )
+        text_embeddings.append(column_embeddings)
+
+    return pd.concat(text_embeddings, axis=1)
+
+
+try:
+    text_embeddings = prepare_text_embeddings(data, text_columns)
+except ValueError as e:
+    print(f"Ошибка обработки текста: {e}")
+    text_embeddings = pd.DataFrame()  # Создаем пустую таблицу, если текста нет
+
+# --- ОБЪЕДИНЕНИЕ ВСЕХ ДАННЫХ ---
+processed_data = pd.concat([data[numerical_columns], encoded_categorical, text_embeddings], axis=1)
 processed_data["participant_id"] = participant_id
 
-# Сохранение обработанных данных
-processed_data.to_csv("C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/hypertension_clustering_processed.csv", index=False)
+# --- СОХРАНЕНИЕ РЕЗУЛЬТАТА ---
+processed_data.to_csv(
+    "C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/hypertension_clustering_processed.csv", index=False)
