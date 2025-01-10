@@ -65,20 +65,27 @@ image_features_df["participant_id"] = image_features_df["image_path"].apply(lamb
 # Загрузка таблицы биомаркеров
 biomarkers_data = pd.read_csv("/mnt/data/hypertension_clustering_processed.csv")
 
+# Приведение типов для корректного объединения
+image_features_df["participant_id"] = image_features_df["participant_id"].astype(str)
+biomarkers_data["participant_id"] = biomarkers_data["participant_id"].astype(str)
+
 # Объединяем биомаркеры и признаки изображений
 final_data = image_features_df.merge(biomarkers_data, on="participant_id", how="left")
 
 # Проверяем соответствие данных
-if final_data.isnull().any().any():
-    print("Есть строки без соответствующих биомаркеров! Проверьте данные.")
+missing_data = final_data[final_data.isnull().any(axis=1)]
+if not missing_data.empty:
+    print(f"Есть строки без соответствующих биомаркеров! Количество таких строк: {len(missing_data)}")
+else:
+    print("Все строки успешно сопоставлены.")
 
 # Разворачиваем признаки изображений в отдельные столбцы
-if not image_features_df.empty:
-    feature_columns = [f"feature_{i}" for i in range(len(image_features_df['features'].iloc[0]))]
-    final_features = pd.DataFrame(final_data["features"].tolist(), columns=feature_columns)
-    final_data = pd.concat([final_data.drop(columns=["features"]), final_features], axis=1)
+feature_columns = [f"feature_{i}" for i in range(len(image_features_df['features'].iloc[0]))]
+final_features = pd.DataFrame(final_data["features"].tolist(), columns=feature_columns)
+final_data = pd.concat([final_data.drop(columns=["features"]), final_features], axis=1)
 
 # Сохраняем результат
-final_data.to_csv("final_data_with_image_features.csv", index=False)
+output_path = "final_data_with_image_features.csv"
+final_data.to_csv(output_path, index=False)
 
-print("Обработка завершена. Данные сохранены в 'final_data_with_image_features.csv'.")
+print(f"Обработка завершена. Данные сохранены в '{output_path}'.")
