@@ -2,13 +2,13 @@ import os
 import torch
 from torchvision import transforms
 from PIL import Image
+import models_vit
 import pandas as pd
 
 
 # Подготовка модели
 def prepare_model(chkpt_dir, arch='vit_large_patch16'):
-    from models_vit import __dict__ as models_vit
-    model = models_vit[arch](
+    model = models_vit.__dict__[arch](
         img_size=224,
         num_classes=4,
         drop_path_rate=0,
