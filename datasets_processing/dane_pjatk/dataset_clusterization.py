@@ -29,6 +29,7 @@ plt.ylabel('Cumulative Explained Variance')
 plt.title('Choosing Number of Components')
 plt.legend()
 plt.grid()
+plt.savefig("C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/variance_explained.png", dpi=300)
 plt.show()
 
 # Оптимальное количество компонент для 90% объясненной дисперсии
@@ -66,6 +67,7 @@ plt.xlabel("First Principal Component")
 plt.ylabel("Second Principal Component")
 plt.legend(title="Clusters")
 plt.grid(True)
+plt.savefig("C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/2d_cluster_visualization.png", dpi=300)
 plt.show()
 
 # 3D-визуализация кластеров
@@ -96,6 +98,7 @@ ax.set_xlabel("First Principal Component")
 ax.set_ylabel("Second Principal Component")
 ax.set_zlabel("Third Principal Component")
 ax.legend(title="Clusters")
+plt.savefig("C:/Users/Anastasiia/Desktop/Praca_dyplomowa/hypertension_task/3d_cluster_visualization.png", dpi=300)
 plt.show()
 
 # Сохраняем результат
