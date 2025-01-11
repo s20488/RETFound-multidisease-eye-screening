@@ -75,7 +75,12 @@ final_data = image_features_df.merge(biomarkers_data, on="participant_id", how="
 # Проверяем соответствие данных
 missing_data = final_data[final_data.isnull().any(axis=1)]
 if not missing_data.empty:
-    print(f"Есть строки без соответствующих биомаркеров! Количество таких строк: {len(missing_data)}")
+    missing_count = len(missing_data)
+    print(f"Есть строки без соответствующих биомаркеров! Количество таких строк: {missing_count}")
+
+    # Сохраняем индексы строк с отсутствующими биомаркерами
+    missing_data.to_csv("missing_biomarkers.csv", index=False)
+    print(f"Индексы строк без биомаркеров сохранены в 'missing_biomarkers.csv'.")
 else:
     print("Все строки успешно сопоставлены.")
 
@@ -85,7 +90,7 @@ final_features = pd.DataFrame(final_data["features"].tolist(), columns=feature_c
 final_data = pd.concat([final_data.drop(columns=["features"]), final_features], axis=1)
 
 # Сохраняем результат
-output_path = "final_data_with_image_features.csv"
+output_path = "/mnt/data/final_data_with_image_features.csv"
 final_data.to_csv(output_path, index=False)
 
 print(f"Обработка завершена. Данные сохранены в '{output_path}'.")
