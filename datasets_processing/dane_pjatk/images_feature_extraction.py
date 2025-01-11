@@ -79,7 +79,7 @@ if not missing_data.empty:
     print(f"Есть строки без соответствующих биомаркеров! Количество таких строк: {missing_count}")
 
     # Сохраняем индексы строк с отсутствующими биомаркерами
-    missing_data.to_csv("missing_biomarkers.csv", index=False)
+    missing_data.to_csv("/mnt/data/missing_biomarkers.csv", index=False)
     print(f"Индексы строк без биомаркеров сохранены в 'missing_biomarkers.csv'.")
 else:
     print("Все строки успешно сопоставлены.")
