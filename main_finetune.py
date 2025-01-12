@@ -321,8 +321,8 @@ def main(args):
     elif args.smoothing > 0.:
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     else:
-        #class_weights = torch.tensor([1831 / (1285 + 1831), 1285 / (1285 + 1831)], device=device)
-        class_weights = torch.tensor([3000 / (200 + 3000), 200 / (200 + 3000)], device=device)
+        class_weights = torch.tensor([1831 / (1285 + 1831), 1285 / (1285 + 1831)], device=device)
+        #class_weights = torch.tensor([3000 / (200 + 3000), 200 / (200 + 3000)], device=device)
         criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
 
     print("criterion = %s" % str(criterion))
