@@ -142,8 +142,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 @torch.no_grad()
 def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     #class_weights = torch.tensor([7626 / (5229 + 7626), 5229 / (5229 + 7626)], device=device)
-    class_weights = torch.tensor([0.2346, 0.7654], device=device)
-    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+    #class_weights = torch.tensor([0.2346, 0.7654], device=device)
+    #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+    criterion = torch.nn.CrossEntropyLoss()
 
     metric_logger = misc.MetricLogger(delimiter="  ")
     header = 'Test:'
