@@ -321,7 +321,7 @@ def main(args):
     elif args.smoothing > 0.:
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     else:
-        class_weights = torch.tensor([1285 / (1285 + 1831), 1831 / (1285 + 1831)], device=device)
+        class_weights = torch.tensor([7626 / (5229 + 7626), 5229 / (5229 + 7626)], device=device)
         #class_weights = torch.tensor([3000 / (200 + 3000), 200 / (200 + 3000)], device=device)
         criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
 
@@ -392,8 +392,8 @@ if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
 
-    #config = load_config('training_config.yaml')
-    config = load_config('evaluation_config.yaml')  # for evaluation only
+    config = load_config('training_config.yaml')
+    #config = load_config('evaluation_config.yaml')  # for evaluation only
 
     for key, value in config.items():
         setattr(args, key, value)
