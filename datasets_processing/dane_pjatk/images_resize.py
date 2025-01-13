@@ -62,6 +62,7 @@ def process_dicom_images(input_dir, output_dir, border_fraction=0.04, target_siz
 
             print(f"Processed and saved: {output_path}")
 
+
 # Путь к папкам
 input_dir = r"/mnt/data/cfi"
 output_dir = r"/mnt/data/cfi"
