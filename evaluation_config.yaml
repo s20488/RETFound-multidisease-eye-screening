@@ -3,9 +3,9 @@ batch_size: 64
 world_size: 4
 model: vit_large_patch16
 nb_classes: 2
-data_path: /mnt/data/cfi_manual_hypertension_strict/
-task: ./results/finetune_cfi_manual_hypertension_strict/  # specifies the folder for evaluation logs
-resume: ./results/finetune_cfi_manual_hypertension_strict/checkpoint-best.pth
+data_path: /mnt/data/cfi_manual_hypertension_strict2/
+task: ./results/finetune_cfi_manual_hypertension_strict2/  # specifies the folder for evaluation logs
+resume: ./results/finetune_cfi_manual_hypertension_strict2/checkpoint-best.pth
 input_size: 224
 pin_mem: True
 num_workers: 24
