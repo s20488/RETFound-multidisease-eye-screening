@@ -10,7 +10,7 @@ classes_file_path = "/mnt/data/manual_diabetes_distribution.csv"  # Обнови
 source_images_path = "/mnt/data/cfi"
 
 # Путь для сохранения изображений по наборам данных
-target_path = "/mnt/data/cfi_manual_diabetes"
+target_path = "/mnt/data/cfi_manual_hypertension"
 os.makedirs(target_path, exist_ok=True)
 
 # Загрузка файла с классами
