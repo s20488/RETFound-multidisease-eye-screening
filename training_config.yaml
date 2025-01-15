@@ -1,10 +1,10 @@
 batch_size: 64
-accum_iter: 4
+accum_iter: 2
 model: vit_large_patch16
-blr: 2.5e-4
+blr: 1.5e-4
 layer_decay: 0.8
 weight_decay: 0.1
-epochs: 100
+epochs: 120
 warmup_epochs: 10
 drop_path: 0.3
 smoothing: 0.0
