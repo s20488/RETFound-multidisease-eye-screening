@@ -4,7 +4,7 @@ model: vit_large_patch16
 blr: 2.5e-4
 layer_decay: 0.8
 weight_decay: 0.1
-epochs: 150
+epochs: 200
 warmup_epochs: 10
 drop_path: 0.3
 smoothing: 0.0
