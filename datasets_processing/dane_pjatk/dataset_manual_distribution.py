@@ -4,7 +4,7 @@ import shutil
 from sklearn.model_selection import train_test_split
 
 # Путь к файлу с информацией о классах
-classes_file_path = "/mnt/data/manual_diabetes_distribution.csv"  # Обновите путь к вашему файлу
+classes_file_path = "/mnt/data/manual_diabetes.csv"  # Обновите путь к вашему файлу
 
 # Путь к исходным изображениям
 source_images_path = "/mnt/data/cfi"
