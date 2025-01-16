@@ -1,4 +1,3 @@
-eval: true
 batch_size: 64
 world_size: 4
 model: vit_large_patch16
