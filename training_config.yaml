@@ -23,4 +23,3 @@ pin_mem: True
 data_path: /mnt/data/cfi_manual_diabetes/
 task: ./results/finetune_cfi_manual_diabetes/
 resume: ./results/finetune_cfi_manual_diabetes/checkpoint-best.pth
-finetune: ./RETFound_cfp_weights.pth
