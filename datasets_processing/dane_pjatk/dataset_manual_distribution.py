@@ -4,13 +4,13 @@ import shutil
 from sklearn.model_selection import train_test_split
 
 # Путь к файлу с информацией о классах
-classes_file_path = "/mnt/data/manual_glaucoma.csv"  # Обновите путь к вашему файлу
+classes_file_path = "/mnt/data/manual_cataract.csv"  # Обновите путь к вашему файлу
 
 # Путь к исходным изображениям
 source_images_path = "/mnt/data/cfi"
 
 # Путь для сохранения изображений по наборам данных
-target_path = "/mnt/data/cfi_manual_glaucoma"
+target_path = "/mnt/data/cfi_manual_cataract"
 os.makedirs(target_path, exist_ok=True)
 
 # Загрузка файла с классами
