@@ -4,7 +4,7 @@ model: vit_large_patch16
 blr: 2.5e-4
 layer_decay: 0.8
 weight_decay: 0.1
-epochs: 50
+epochs: 150
 warmup_epochs: 10
 drop_path: 0.3
 smoothing: 0.0
@@ -20,6 +20,6 @@ input_size: 224
 num_workers: 24
 world_size: 1
 pin_mem: True
-data_path: /mnt/data/cfi_manual_diabetes/
-task: ./results/finetune_cfi_manual_diabetes/
+data_path: /mnt/data/cfi_manual_glaucoma/
+task: ./results/finetune_cfi_manual_glaucoma/
 finetune: ./RETFound_cfp_weights.pth
