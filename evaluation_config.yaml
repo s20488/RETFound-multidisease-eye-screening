@@ -2,7 +2,7 @@ eval: true
 batch_size: 64
 world_size: 4
 model: vit_large_patch16
-nb_classes: 2
+nb_classes: 4
 data_path: /mnt/data/cfi_manual_hypertension/
 task: ./results/finetune_cfi_manual_hypertension/  # specifies the folder for evaluation logs
 resume: ./results/finetune_cfi_manual_hypertension/checkpoint-best.pth
