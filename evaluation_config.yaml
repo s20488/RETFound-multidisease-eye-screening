@@ -2,7 +2,7 @@ eval: true
 batch_size: 64
 world_size: 4
 model: vit_large_patch16
-nb_classes: 4
+nb_classes: 2
 data_path: /mnt/data/cfi_manual_cataract/
 task: ./results/finetune_cfi_manual_cataract/  # specifies the folder for evaluation logs
 resume: ./results/finetune_cfi_manual_cataract/checkpoint-best.pth
