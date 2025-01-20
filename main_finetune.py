@@ -321,13 +321,13 @@ def main(args):
     elif args.smoothing > 0.:
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     else:
-        class_weights = torch.tensor([0.6568, 2.2123, 0.6307, 2.2731], device=device)  # hypertansion
+        #class_weights = torch.tensor([0.6568, 2.2123, 0.6307, 2.2731], device=device)  # hypertansion
         #class_weights = torch.tensor([0.0739, 0.9261], device=device)  # diabetes
         #class_weights = torch.tensor([1.237, 5.216], device=device) # hypertansion_0.2
         #class_weights = torch.tensor( [0.0211, 0.9789], device=device) # glaucoma
         #class_weights = torch.tensor([0.0599, 0.9401], device=device)  # cataract
-        criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
-        #criterion = torch.nn.CrossEntropyLoss()
+        #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+        criterion = torch.nn.CrossEntropyLoss()
 
     print("criterion = %s" % str(criterion))
 
@@ -396,8 +396,8 @@ if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
 
-    #config = load_config('training_config.yaml')
-    config = load_config('evaluation_config.yaml')  # for evaluation only
+    config = load_config('training_config.yaml')
+    #config = load_config('evaluation_config.yaml')  # for evaluation only
 
     for key, value in config.items():
         setattr(args, key, value)
