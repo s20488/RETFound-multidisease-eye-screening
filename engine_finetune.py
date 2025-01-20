@@ -143,7 +143,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     #class_weights = torch.tensor([0.0211, 0.9789], device=device)  # glaucoma
     #class_weights = torch.tensor([0.0739, 0.9261], device=device)  # diabetes
-    class_weights = torch.tensor([2.998, 1.501], device=device)  # diabetes_short
+    #class_weights = torch.tensor([2.998, 1.501], device=device)  # diabetes_short
+    class_weights = torch.tensor([2.99, 1.50], device=device)  # glaucoma_short
     #class_weights = torch.tensor([1.237, 5.216], device=device)  # hypertansion_strict2
     #class_weights = torch.tensor([0.6568, 2.2123, 0.6307, 2.2731], device=device)  # hypertansion
     #class_weights = torch.tensor([0.0599, 0.9401], device=device)  # cataract

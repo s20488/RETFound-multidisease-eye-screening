@@ -20,6 +20,6 @@ input_size: 224
 num_workers: 24
 world_size: 1
 pin_mem: True
-data_path: /mnt/data/cfi_manual_diabetes_0.1/
-task: ./results/finetune_cfi_manual_diabetes_0.1_1/
+data_path: /mnt/data/cfi_manual_glaucoma_0.1/
+task: ./results/finetune_cfi_manual_glaucoma_0.1/
 finetune: ./RETFound_cfp_weights.pth
