@@ -9,11 +9,11 @@ warmup_epochs: 5
 drop_path: 0.2
 smoothing: 0.0
 color_jitter: 0.1
-aa: 'v0'
-reprob: 0.0
-mixup: 0.05
-cutmix: 0.05
-mixup_prob: 0.3
+aa: 'rand-m9-mstd0.5-inc1'
+reprob: 0.2
+mixup: 0.0
+cutmix: 0.0
+mixup_prob: 0.0
 mixup_mode: 'batch'
 nb_classes: 2
 input_size: 224
@@ -21,5 +21,5 @@ num_workers: 24
 world_size: 1
 pin_mem: True
 data_path: /mnt/data/cfi_manual_diabetes_0.1/
-task: ./results/finetune_cfi_manual_diabetes_0.1/
+task: ./results/finetune_cfi_manual_diabetes_0.1_1/
 finetune: ./RETFound_cfp_weights.pth
