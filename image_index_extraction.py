@@ -14,8 +14,8 @@ updated_rows = []
 # Обрабатываем каждую папку (train, val, test)
 for dataset_type in ['train', 'val', 'test']:
     dataset_path = os.path.join(base_folder, dataset_type)  # Путь к train/val/test
-    for label in ['normal', 'diabetes']:  # Метки: 0 и 1
-        label_path = os.path.join(dataset_path, label)  # Путь к train/0, train/1 и т.д.
+    for label in ['normal', 'diabetes']:  # Метки: normal и diabetes
+        label_path = os.path.join(dataset_path, label)  # Путь к train/normal, train/diabetes и т.д.
 
         if not os.path.exists(label_path):  # Если папка не существует
             print(f"Папка не найдена: {label_path}")
@@ -36,14 +36,14 @@ for dataset_type in ['train', 'val', 'test']:
                     for _, row in matching_rows.iterrows():
                         new_row = row.copy()
                         new_row['image_path'] = os.path.join(label_path, file_name)  # Путь к изображению
-                        new_row['label'] = int(label)  # Метка (0 или 1)
+                        new_row['label'] = 0 if label == 'normal' else 1  # Метка: 0 для normal, 1 для diabetes
                         updated_rows.append(new_row)
 
 # Создаём DataFrame из обновлённых данных
 updated_data = pd.DataFrame(updated_rows)
 
 # Сохраняем результат в новый CSV
-output_csv_path = "/mnt/data/processed_data_with_id.csv"
+output_csv_path = "/mnt/data/updated_data_with_images.csv"
 updated_data.to_csv(output_csv_path, index=False)
 
 print(f"Обновлённый CSV сохранён в файл: {output_csv_path}")
