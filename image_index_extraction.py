@@ -14,7 +14,7 @@ updated_rows = []
 # Обрабатываем каждую папку (train, val, test)
 for dataset_type in ['train', 'val', 'test']:
     dataset_path = os.path.join(base_folder, dataset_type)  # Путь к train/val/test
-    for label in ['diabetes', 'normal']:  # Метки: 0 и 1
+    for label in ['normal', 'diabetes']:  # Метки: 0 и 1
         label_path = os.path.join(dataset_path, label)  # Путь к train/0, train/1 и т.д.
 
         if not os.path.exists(label_path):  # Если папка не существует
