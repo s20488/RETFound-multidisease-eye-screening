@@ -5,7 +5,7 @@ import pandas as pd
 image_folder = "cfi_manual_diabetes_0.1/"  # Укажи папку с изображениями
 
 # Загрузка исходного CSV
-csv_file_path = "processed_data_with_id.csv"
+csv_file_path = "/mnt/data/processed_data_with_id.csv"
 data = pd.read_csv(csv_file_path)
 
 # Новый список для обновлённых данных
