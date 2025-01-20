@@ -15,7 +15,7 @@ mixup: 0.05
 cutmix: 0.05
 mixup_prob: 0.3
 mixup_mode: 'batch'
-nb_classes: 4
+nb_classes: 2
 input_size: 224
 num_workers: 24
 world_size: 1
