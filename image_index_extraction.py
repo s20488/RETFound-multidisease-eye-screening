@@ -5,7 +5,7 @@ import pandas as pd
 base_folder = "/mnt/data/cfi_manual_diabetes_0.1/"  # Папка, содержащая train, val, test
 
 # Загружаем файл с признаками
-csv_file_path = "/mnt/data/updated_data_with_image_paths.csv"
+csv_file_path = "/mnt/data/processed_data_with_id.csv"
 data = pd.read_csv(csv_file_path)
 
 # Списки для хранения обновлённых строк
@@ -43,7 +43,7 @@ for dataset_type in ['train', 'val', 'test']:
 updated_data = pd.DataFrame(updated_rows)
 
 # Сохраняем результат в новый CSV
-output_csv_path = "/mnt/data/updated_data_with_image_paths.csv"
+output_csv_path = "/mnt/data/processed_data_with_id.csv"
 updated_data.to_csv(output_csv_path, index=False)
 
 print(f"Обновлённый CSV сохранён в файл: {output_csv_path}")
