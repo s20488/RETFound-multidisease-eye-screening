@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-base_dir = '/mnt/data/cfi_manual_hypertension_AHA'
+base_dir = '/mnt/data/cfi_manual_diabetes'
 
 data = []
 
