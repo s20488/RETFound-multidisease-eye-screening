@@ -34,6 +34,6 @@ plt.legend(
     loc="upper right"
 )
 
-plt.savefig('dataset_distribution_hypertension_AHA.png', dpi=300)
+plt.savefig('/mnt/data/dataset_distribution_hypertension_AHA.png', dpi=300)
 plt.show()
 plt.close()
