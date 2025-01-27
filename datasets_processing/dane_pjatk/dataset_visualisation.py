@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-base_dir = '/mnt/data/cfi_manual_glaucoma'
+base_dir = '/mnt/data/cfi_manual_hypertension_AHA'
 
 data = []
 
@@ -36,6 +36,6 @@ plt.legend(
 
 ax.tick_params(axis='both', which='major', labelsize=15)
 
-plt.savefig('/mnt/data/dataset_distribution_glaucoma.png', dpi=300)
+plt.savefig('/mnt/data/dataset_distribution_hypertension_aha.png', dpi=300)
 plt.show()
 plt.close()
