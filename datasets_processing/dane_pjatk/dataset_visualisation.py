@@ -29,7 +29,7 @@ plt.xlabel("Kategorie", fontsize=15)
 plt.ylabel("Ilość", fontsize=15)
 plt.legend(
     title="Kategorie",
-    labels=["Cukr", "Brak chorób"],
+    labels=["Cukrzyca", "Brak chorób"],
     loc="upper right",
     fontsize=15
 )
