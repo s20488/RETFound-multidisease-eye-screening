@@ -30,10 +30,10 @@ plt.xlabel("Kategorie")
 plt.ylabel("Ilość")
 plt.legend(
     title="Kategorie",
-    labels=["Nadciśnienie tętnicze", "Brak chorób"],
+    labels=["Cukrzyca", "Brak chorób"],
     loc="upper right"
 )
 
-plt.savefig('/mnt/data/dataset_distribution_hypertension_AHA.png', dpi=300)
+plt.savefig('/mnt/data/dataset_distribution_diabetes.png', dpi=300)
 plt.show()
 plt.close()
