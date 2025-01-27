@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-base_dir = '/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/Kaggle'
+base_dir = '/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/REFUGE2'
 
 data = []
 
@@ -29,13 +29,13 @@ plt.xlabel("Kategorie", fontsize=15)
 plt.ylabel("Ilość", fontsize=15)
 plt.legend(
     title="Kategorie",
-    labels=["Zaćma", "DR", "Jaskra", "Brak chorób"],
     loc="upper right",
-    fontsize=15
+    fontsize=15,
+    title_fontsize=15
 )
 
 ax.tick_params(axis='both', which='major', labelsize=15)
 
-plt.savefig('/mnt/data/dataset_distribution_kaggle.png', dpi=300)
+plt.savefig('/mnt/data/dataset_distribution_refuge2.png', dpi=300)
 plt.show()
 plt.close()
