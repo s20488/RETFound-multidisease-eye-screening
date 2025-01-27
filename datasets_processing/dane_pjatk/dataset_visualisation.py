@@ -22,17 +22,19 @@ fig, ax = plt.subplots(figsize=(8, 6))
 sns.barplot(data=df, x='Category', y='Count', hue='Label', palette='viridis', ax=ax)
 
 ax.set_axisbelow(True)
-
 plt.grid(axis='y', linestyle='-', alpha=0.7)
 plt.grid(axis='x', linestyle='-', alpha=0.7)
 
-plt.xlabel("Kategorie")
-plt.ylabel("Ilość")
+plt.xlabel("Kategorie", fontsize=14)
+plt.ylabel("Ilość", fontsize=14)
 plt.legend(
     title="Kategorie",
-    labels=["Cukrzyca", "Brak chorób"],
-    loc="upper right"
+    labels=["Cukr", "Brak chorób"],
+    loc="upper right",
+    fontsize=14
 )
+
+ax.tick_params(axis='both', which='major', labelsize=14)
 
 plt.savefig('/mnt/data/dataset_distribution_diabetes.png', dpi=300)
 plt.show()
