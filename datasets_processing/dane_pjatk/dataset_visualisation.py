@@ -3,7 +3,7 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-base_dir = '/mnt/data/cfi_manual_cataract'
+base_dir = '/mnt/data/cfi_manual_glaucoma'
 
 data = []
 
@@ -29,13 +29,13 @@ plt.xlabel("Kategorie", fontsize=15)
 plt.ylabel("Ilość", fontsize=15)
 plt.legend(
     title="Kategorie",
-    labels=["Zaćma", "Brak chorób"],
+    labels=["Jaskra", "Brak chorób"],
     loc="upper right",
     fontsize=15
 )
 
 ax.tick_params(axis='both', which='major', labelsize=15)
 
-plt.savefig('/mnt/data/dataset_distribution_cataract.png', dpi=300)
+plt.savefig('/mnt/data/dataset_distribution_glaucoma.png', dpi=300)
 plt.show()
 plt.close()
