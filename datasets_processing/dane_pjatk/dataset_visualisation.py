@@ -29,7 +29,7 @@ plt.xlabel("Kategorie", fontsize=15)
 plt.ylabel("Ilość", fontsize=15)
 plt.legend(
     title="Kategorie",
-    labels=["Zaćma", "Retinopatia cukrzycowa (DR)", "Jaskra", "Brak chorób"],
+    labels=["Zaćma", "DR", "Jaskra", "Brak chorób"],
     loc="upper right",
     fontsize=15
 )
