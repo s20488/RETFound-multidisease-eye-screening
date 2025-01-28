@@ -1,7 +1,7 @@
 batch_size: 64
 accum_iter: 4
 model: vit_large_patch16
-blr: 2e-4
+blr: 2.0e-4
 layer_decay: 0.85
 weight_decay: 0.15
 epochs: 80
