@@ -143,9 +143,9 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     # class_weights = torch.tensor([3.00, 1.50], device=device)  # cataract
     # class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
-    class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
-    criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
-    #criterion = torch.nn.CrossEntropyLoss()
+    # class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
+    #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+    criterion = torch.nn.CrossEntropyLoss()
 
     metric_logger = misc.MetricLogger(delimiter="  ")
     header = 'Test:'

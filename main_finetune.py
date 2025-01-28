@@ -323,9 +323,9 @@ def main(args):
     else:
         #class_weights = torch.tensor([3.00, 1.50], device=device)  # cataract
         #class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
-        class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
-        criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
-        #criterion = torch.nn.CrossEntropyLoss()
+        #class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
+        #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
+        criterion = torch.nn.CrossEntropyLoss()
 
     print("criterion = %s" % str(criterion))
 
