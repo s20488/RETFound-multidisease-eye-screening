@@ -322,8 +322,8 @@ def main(args):
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     else:
         #class_weights = torch.tensor([3.00, 1.50], device=device)  # cataract
-        class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
-        #class_weights = torch.tensor([0.75, 1.50], device=device)  # glaucoma
+        #class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
+        class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
         criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
         #criterion = torch.nn.CrossEntropyLoss()
 

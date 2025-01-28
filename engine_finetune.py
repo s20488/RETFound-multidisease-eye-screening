@@ -142,8 +142,8 @@ def train_one_epoch(model: torch.nn.Module, criterion: torch.nn.Module,
 @torch.no_grad()
 def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     # class_weights = torch.tensor([3.00, 1.50], device=device)  # cataract
-    class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
-    # class_weights = torch.tensor([0.75, 1.50], device=device)  # glaucoma
+    # class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
+    class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
     criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
     #criterion = torch.nn.CrossEntropyLoss()
 
