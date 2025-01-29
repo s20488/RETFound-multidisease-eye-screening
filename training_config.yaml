@@ -20,7 +20,6 @@ input_size: 224
 num_workers: 24
 world_size: 1
 pin_mem: True
-data_path: /mnt/data/cfi_manual_hypertension_AHA/
-task: ./results/finetune_cfi_manual_hypertension_AHA_top/
-resume: ./results/finetune_cfi_manual_hypertension_AHA_top/checkpoint-best.pth
+data_path: /mnt/data/cfi_manual_hypertension_AHA_without_diabetes/
+task: ./results/finetune_cfi_manual_hypertension_AHA_without_diabetes/
 finetune: ./RETFound_cfp_weights.pth
