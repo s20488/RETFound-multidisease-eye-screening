@@ -4,7 +4,7 @@ model: vit_large_patch16
 blr: 2.0e-4
 layer_decay: 0.85
 weight_decay: 0.15
-epochs: 40
+epochs: 80
 warmup_epochs: 5
 drop_path: 0.1
 smoothing: 0.05
@@ -22,4 +22,5 @@ world_size: 1
 pin_mem: True
 data_path: /mnt/data/cfi_manual_hypertension_AHA/
 task: ./results/finetune_cfi_manual_hypertension_AHA_top/
+resume: ./results/finetune_cfi_manual_hypertension_AHA_top/checkpoint-best.pth
 finetune: ./RETFound_cfp_weights.pth
