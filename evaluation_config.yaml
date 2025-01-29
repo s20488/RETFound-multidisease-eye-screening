@@ -3,7 +3,7 @@ batch_size: 64
 world_size: 4
 model: vit_large_patch16
 nb_classes: 2
-data_path: /mnt/data/cfi_manual_glaucoma/
+data_path: /mnt/data/cfi_manual_hypertension_AHA/
 task: ./results/finetune_cfi_manual_hypertension_AHA_top/  # specifies the folder for evaluation logs
 resume: ./results/finetune_cfi_manual_hypertension_AHA_top/checkpoint-best.pth
 input_size: 224
