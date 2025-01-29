@@ -22,5 +22,4 @@ world_size: 1
 pin_mem: True
 data_path: /mnt/data/cfi_manual_hypertension_AHA/
 task: ./results/finetune_cfi_manual_hypertension_AHA_top/
-resume: ./results/finetune_cfi_manual_hypertension_AHA_top/checkpoint-best.pth
 finetune: ./RETFound_cfp_weights.pth
