@@ -9,5 +9,3 @@ resume: ./results/finetune_cfi_manual_hypertension_AHA_without_diabetes/checkpoi
 input_size: 224
 pin_mem: True
 num_workers: 24
-
-

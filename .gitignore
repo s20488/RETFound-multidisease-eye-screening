@@ -158,4 +158,4 @@ finetune_IDRiD
 /datasets_processing/REFUGE2
 
 evaluation_config.yaml
-training_config.yaml
+finetuning.yaml
