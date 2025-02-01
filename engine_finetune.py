@@ -197,9 +197,8 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     metric_logger.synchronize_between_processes()
 
     print(
-        'Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'.format(acc, auc_roc,
-                                                                                                           auc_pr, F1,
-                                                                                                           mcc))
+        'Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'
+        .format(acc, auc_roc, auc_pr, F1, mcc))
     results_path = task + '_metrics_{}.csv'.format(mode)
     with open(results_path, mode='a', newline='', encoding='utf8') as cfa:
         wf = csv.writer(cfa)
@@ -226,7 +225,8 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         class_metrics_path = task + '_class_metrics_test.csv'
         with open(class_metrics_path, mode='a', newline='', encoding='utf8') as cfa:
             wf = csv.writer(cfa)
-            wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC', 'AUC-PR', 'F1', 'MCC'])
+            wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC',
+                         'AUC-PR', 'F1', 'MCC'])
             for i in range(num_class):
                 tp = multi_cm[i][1][1]
                 tn = multi_cm[i][0][0]
