@@ -156,6 +156,7 @@ finetune_IDRiD
 /datasets_processing/ODIR
 /datasets_processing/ORIGA
 /datasets_processing/REFUGE2
+/datasets_processing/dane_pjatk
 
 evaluation_config.yaml
 finetuning.yaml
