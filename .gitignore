@@ -147,16 +147,16 @@ internal_IDRiD
 finetune_IDRiD
 
 # Datasets Jupyter processing
-/datasets_processing/ADAM
+/datasets_processing/public_datasets/ADAM
 /datasets_processing/bialostok_examples
 /datasets_processing/HHR
 /datasets_processing/IDRiD
-/datasets_processing/Kaggle
+/datasets_processing/public_datasets/Kaggle
 /datasets_processing/MESSIDOR-2
 /datasets_processing/ODIR
 /datasets_processing/ORIGA
-/datasets_processing/REFUGE2
-/datasets_processing/dane_pjatk
+/datasets_processing/public_datasets/REFUGE2
+/datasets_processing/private_dataset/dane_pjatk
 
 evaluation_config.yaml
 finetuning.yaml

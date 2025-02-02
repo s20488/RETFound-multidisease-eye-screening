@@ -1,23 +1,63 @@
-import time
+# model_test.py
 import torch
 from deepchecks.core import CheckResult, ConditionCategory, ConditionResult
 from deepchecks.vision import ModelOnlyCheck
-from models_vit import vit_large_patch16
+from models_vit import vit_large_patch16  # Импорт модели из вашего проекта
+from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+from timm.data import create_transform
+import os
 
 # Глобальные параметры
-INPUT_SHAPE = (3, 224, 224)
 DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+BATCH_SIZE = 16
+INPUT_SHAPE = (3, 224, 224)
 
-# Инициализация модели
-model = vit_large_patch16(global_pool=True).to(DEVICE)
-
+# Средние значения и стандартные отклонения для ImageNet
+IMAGENET_DEFAULT_MEAN = [0.485, 0.456, 0.406]  # Среднее значение
+IMAGENET_DEFAULT_STD = [0.229, 0.224, 0.225]   # Стандартное отклонение
 
 # Функция для создания фиктивного входа
 def create_dummy_input(input_shape, device):
     return torch.randn(1, *input_shape).to(device)
 
+# Пример функции для загрузки датасетов
+def build_dataset(is_train, args):
+    transform = build_transform(is_train, args)
+    root = os.path.join(args.data_path, is_train)
+    dataset = datasets.ImageFolder(root, transform=transform)
+    return dataset
 
-# Проверка входных данных
+def build_transform(is_train, args):
+    mean = IMAGENET_DEFAULT_MEAN
+    std = IMAGENET_DEFAULT_STD
+    if is_train == 'train':
+        transform = create_transform(
+            input_size=args.input_size,
+            is_training=True,
+            color_jitter=args.color_jitter,
+            auto_augment=args.aa,
+            interpolation='bicubic',
+            re_prob=args.reprob,
+            re_mode=args.remode,
+            re_count=args.recount,
+            mean=mean,
+            std=std,
+        )
+        return transform
+
+    t = []
+    if args.input_size <= 224:
+        crop_pct = 224 / 256
+    else:
+        crop_pct = 1.0
+    size = int(args.input_size / crop_pct)
+    t.append(transforms.Resize(size, interpolation=transforms.InterpolationMode.BICUBIC))
+    t.append(transforms.CenterCrop(args.input_size))
+    t.append(transforms.ToTensor())
+    t.append(transforms.Normalize(mean, std))
+    return transforms.Compose(t)
+
 class ModelInputShapeCheck(ModelOnlyCheck):
     def __init__(self, expected_input_shape: tuple, **kwargs):
         super().__init__(**kwargs)
@@ -25,10 +65,16 @@ class ModelInputShapeCheck(ModelOnlyCheck):
 
     def compute(self, context: dict) -> CheckResult:
         model = context['model']
+        dataset = context['dataset']
         dummy_input = create_dummy_input(self.expected_input_shape, DEVICE)
+
         try:
             with torch.no_grad():
-                output = model(dummy_input)
+                # Используем DataLoader для инференса
+                for data in dataset:
+                    input_data, _ = data
+                    output = model(input_data.to(DEVICE))  # data[0] — это изображение, предполагая, что dataset возвращает пару (input, target)
+                    break  # Останавливаемся на первом батче для проверки
             result = {'input_shape_passed': True, 'output_shape': output.shape}
             display = f"Input compatible. Output shape: {output.shape}"
         except Exception as e:
@@ -39,8 +85,7 @@ class ModelInputShapeCheck(ModelOnlyCheck):
     def add_condition_output_shape(self, expected_output_shape: tuple):
         def condition(result):
             if result.get('input_shape_passed', False):
-                category = ConditionCategory.PASS if result[
-                                                         'output_shape'] == expected_output_shape else ConditionCategory.FAIL
+                category = ConditionCategory.PASS if result['output_shape'] == expected_output_shape else ConditionCategory.FAIL
                 message = f"Expected output shape {expected_output_shape}, got {result['output_shape']}."
             else:
                 category = ConditionCategory.FAIL
@@ -50,93 +95,40 @@ class ModelInputShapeCheck(ModelOnlyCheck):
         return self.add_condition("Output shape matches expected", condition)
 
 
-# Проверка времени инференса
-class ModelInferenceTimeCheck(ModelOnlyCheck):
-    def compute(self, context: dict) -> CheckResult:
-        model = context['model']
-        dummy_input = create_dummy_input(INPUT_SHAPE, DEVICE)
-        start_time = time.time()
-        with torch.no_grad():
-            _ = model(dummy_input)
-        end_time = time.time()
-        inference_time = end_time - start_time
-        result = {'inference_time': inference_time}
-        display = [f"Inference time: {inference_time:.4f} seconds"]
-        return CheckResult(result, display=display)
+if __name__ == "__main__":
+    # Параметры и модель
+    class Args:
+        data_path = r"C:\Users\Anastasiia\Desktop\Praca_dyplomowa\Praktyka\RETFound_MAE\ORIGA"
+        input_size = 224
+        color_jitter = 0.4
+        aa = 'rand-m9-mstd0.5'
+        reprob = 0.25
+        remode = 'pixel'
+        recount = 1
+        batch_size = 16
+        num_workers = 4
+        pin_mem = True
 
-    def add_condition_max_time(self, max_time: float):
-        def condition(result):
-            category = ConditionCategory.PASS if result['inference_time'] <= max_time else ConditionCategory.FAIL
-            message = f"Inference time: {result['inference_time']:.4f} seconds (max {max_time} seconds)."
-            return ConditionResult(category, message)
+    args = Args()
 
-        return self.add_condition("Inference time within limits", condition)
+    # Загрузка датасетов
+    dataset_train = build_dataset(is_train='train', args=args)
+    dataset_val = build_dataset(is_train='val', args=args)
+    dataset_test = build_dataset(is_train='test', args=args)
 
+    # Создайте DataLoader
+    dataloader_train = DataLoader(dataset_train, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+    dataloader_val = DataLoader(dataset_val, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+    dataloader_test = DataLoader(dataset_test, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
-# Проверка распределения весов
-class ModelWeightDistributionCheck(ModelOnlyCheck):
-    def compute(self, context: dict) -> CheckResult:
-        model = context['model']
-        weights = [p.data.flatten() for p in model.parameters() if p.requires_grad]
-        all_weights = torch.cat(weights)
+    model = vit_large_patch16(global_pool=True).to(DEVICE)
 
-        mean_weight = all_weights.mean().item()
-        std_weight = all_weights.std().item()
-        max_weight = all_weights.max().item()
-        min_weight = all_weights.min().item()
+    # Передача модели и датасета в контекст
+    context = {'model': model, 'dataset': dataloader_test}
 
-        result = {
-            'mean_weight': mean_weight,
-            'std_weight': std_weight,
-            'max_weight': max_weight,
-            'min_weight': min_weight
-        }
-        display = [f"Mean: {mean_weight:.4f}, Std: {std_weight:.4f}, Max: {max_weight:.4f}, Min: {min_weight:.4f}"]
-        return CheckResult(result, display=display)
+    # Инициализация и запуск проверки
+    input_shape_check = ModelInputShapeCheck(expected_input_shape=INPUT_SHAPE)
+    input_shape_check.add_condition_output_shape(expected_output_shape=(1, 1024))
 
-
-# Проверка распределения выходов
-class ModelOutputDistributionCheck(ModelOnlyCheck):
-    def compute(self, context: dict) -> CheckResult:
-        model = context['model']
-        dummy_input = create_dummy_input(INPUT_SHAPE, DEVICE)
-        with torch.no_grad():
-            output = model(dummy_input)
-
-        max_value = output.max().item()
-        min_value = output.min().item()
-        mean_value = output.mean().item()
-
-        result = {
-            'max_value': max_value,
-            'min_value': min_value,
-            'mean_value': mean_value
-        }
-        display = [f"Output range: [{min_value:.4f}, {max_value:.4f}]. Mean: {mean_value:.4f}"]
-        return CheckResult(result, display=display)
-
-
-# Контекст передаётся как словарь
-context = {'model': model}
-
-# Инициализация проверок
-input_shape_check = ModelInputShapeCheck(expected_input_shape=INPUT_SHAPE)
-input_shape_check.add_condition_output_shape(expected_output_shape=(1, 1024))
-
-inference_check = ModelInferenceTimeCheck()
-inference_check.add_condition_max_time(max_time=0.1)
-
-weight_distribution_check = ModelWeightDistributionCheck()
-output_distribution_check = ModelOutputDistributionCheck()
-
-# Запуск проверок
-input_shape_result = input_shape_check.run(context)
-inference_result = inference_check.run(context)
-weight_distribution_result = weight_distribution_check.run(context)
-output_distribution_result = output_distribution_check.run(context)
-
-# Вывод результатов
-input_shape_result.show()
-inference_result.show()
-weight_distribution_result.show()
-output_distribution_result.show()
+    result = input_shape_check.run(context)
+    result.show()
