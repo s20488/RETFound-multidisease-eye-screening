@@ -123,27 +123,19 @@ os.makedirs(output_dir, exist_ok=True)
 
 # Применение Grad-CAM к каждому изображению
 for image_path in image_paths:
-    # Загрузка и предобработка изображения
     img_tensor = load_and_preprocess_image(image_path)
+    target_class = 1  # Укажите ваш целевой класс
 
-    # Определение целевого класса (например, 1 для класса 1)
-    target_class = 1  # Меняйте в зависимости от задачи
-
-    # Применение Grad-CAM
     grad_cam_map = grad_cam_vit(model, img_tensor, target_class)
 
-    # Визуализация и сохранение
     plt.figure(figsize=(10, 5))
-
-    # Оригинальное изображение
     plt.subplot(1, 2, 1)
     plt.imshow(Image.open(image_path))
-    plt.title("Original Image")
+    plt.title("Original")
     plt.axis('off')
 
-    # Карта Grad-CAM
     plt.subplot(1, 2, 2)
-    plt.imshow(grad_cam_map, cmap='jet')
+    plt.imshow(grad_cam_map, cmap='jet', alpha=0.5)
     plt.title("Grad-CAM")
     plt.axis('off')
 
