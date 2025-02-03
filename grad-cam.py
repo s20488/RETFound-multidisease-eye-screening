@@ -1,104 +1,158 @@
 import torch
+import models_vit
+from util.pos_embed import interpolate_pos_embed
+from timm.models.layers import trunc_normal_
+import torch.nn.functional as F
+import matplotlib.pyplot as plt
+import cv2
 import numpy as np
-import os
-from torchvision import transforms
 from PIL import Image
-from models_vit import vit_large_patch16
+import torchvision.transforms as transforms
+import os
+
+# Загрузка модели
+model = models_vit.__dict__['vit_large_patch16'](
+    num_classes=2,
+    drop_path_rate=0.2,
+    global_pool=True,
+)
+
+# Загрузка весов
+checkpoint = torch.load('RETFound_cfp_weights.pth', map_location='cpu')
+checkpoint_model = checkpoint['model']
+state_dict = model.state_dict()
+for k in ['head.weight', 'head.bias']:
+    if k in checkpoint_model and checkpoint_model[k].shape != state_dict[k].shape:
+        print(f"Removing key {k} from pretrained checkpoint")
+        del checkpoint_model[k]
+
+# Интерполяция позиционных эмбеддингов
+interpolate_pos_embed(model, checkpoint_model)
+
+# Загрузка предобученной модели
+msg = model.load_state_dict(checkpoint_model, strict=False)
+
+assert set(msg.missing_keys) == {'head.weight', 'head.bias', 'fc_norm.weight', 'fc_norm.bias'}
+
+# Инициализация fc слоя
+trunc_normal_(model.head.weight, std=2e-5)
+
+print("Model = %s" % str(model))
 
 
-# Grad-CAM
-class GradCAM:
-    def __init__(self, model, target_layer):
-        self.model = model
-        self.target_layer = target_layer
-        self.activations = None
-        self.gradients = None
-
-        # Регистрация хуков
-        self._register_hooks()
-
-    def _register_hooks(self):
-        def forward_hook(module, input, output):
-            self.activations = output
-
-        def backward_hook(module, grad_in, grad_out):
-            self.gradients = grad_out[0]
-
-        target_module = dict(self.model.named_modules())[self.target_layer]
-        target_module.register_forward_hook(forward_hook)
-        target_module.register_backward_hook(backward_hook)
-
-    def generate_heatmap(self, input_tensor, class_index=None):
-        self.model.zero_grad()
-        output = self.model(input_tensor)
-        class_index = class_index if class_index is not None else torch.argmax(output, dim=1).item()
-        loss = output[:, class_index]
-        loss.backward()
-
-        pooled_grads = torch.mean(self.gradients, dim=(0, 2, 3))
-        activations = self.activations.squeeze(0)
-        heatmap = torch.einsum("chw,c->hw", activations, pooled_grads).detach().cpu().numpy()
-        return np.maximum(heatmap, 0) / np.max(heatmap)  # ReLU + нормализация
-
-
-# Предобработка изображения
-def preprocess_image(image_path, target_size=(224, 224)):
-    preprocess = transforms.Compose([
-        transforms.Resize(target_size),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-    ])
-    img = Image.open(image_path).convert('RGB')
-    return preprocess(img).unsqueeze(0), img
-
-
-# Сохранение тепловой карты
-def save_heatmap(image, heatmap, save_path, alpha=0.6):
-    heatmap = np.uint8(255 * heatmap)
-    heatmap = Image.fromarray(heatmap).resize(image.size, resample=Image.BICUBIC)
-    heatmap = np.expand_dims(np.array(heatmap), axis=2)
-    heatmap = np.concatenate([heatmap] * 3, axis=2)
-    overlay = np.uint8(alpha * heatmap + (1 - alpha) * np.array(image))
-    Image.fromarray(overlay).save(save_path)
-    print(f"Сохранено: {save_path}")
-
-
-# Основной код
-if __name__ == "__main__":
-    # Загрузка модели
-    model = vit_large_patch16(global_pool=True)
-    model.load_state_dict(torch.load(
-        '/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_hypertension_strict/checkpoint-best.pth',
-        map_location=torch.device('gpu')
-    ))
+# Функция для Grad-CAM
+def grad_cam_vit(model, img, target_class):
     model.eval()
 
-    # Пути к изображениям
-    image_paths = [
-        "/mnt/data/cfi_manual_hypertension_0.1/train/1/17947_20230801130127534.png",
-        "/mnt/data/cfi_manual_hypertension_0.1/train/0/11929_20210225080615244.png",
-        "/mnt/data/cfi_manual_hypertension_0.1/val/0/12134_20220112141845970.png",
-        "/mnt/data/cfi_manual_hypertension_0.1/val/1/10098_20210225071827175.png",
-        "/mnt/data/cfi_manual_hypertension_0.1/test/1/12131_20210929141207205.png"
-    ]
+    # Получаем активации и градиенты последнего блока
+    activations = None
+    gradients = None
 
-    # Папка для сохранения результатов
-    output_folder = "heatmap_results/"
-    os.makedirs(output_folder, exist_ok=True)
+    # Хук для захвата активаций
+    def forward_hook(module, input, output):
+        nonlocal activations
+        activations = output
+        activations.retain_grad()  # Важно: сохраняем градиенты для активаций
 
-    # Grad-CAM
-    grad_cam = GradCAM(model, target_layer='blocks.23')  # Убедись, что слой существует
+    # Хук для захвата градиентов
+    def backward_hook(module, grad_input, grad_output):
+        nonlocal gradients
+        gradients = grad_output[0]
 
-    for image_path in image_paths:
-        try:
-            # Подготовка данных
-            img_tensor, original_image = preprocess_image(image_path)
+    # Регистрируем хуки
+    hook_forward = model.blocks[-1].register_forward_hook(forward_hook)
+    hook_backward = model.blocks[-1].register_backward_hook(backward_hook)
 
-            # Генерация тепловой карты
-            heatmap = grad_cam.generate_heatmap(img_tensor)
+    # Прямой проход
+    output = model(img)
 
-            # Сохранение изображения с тепловой картой
-            save_path = os.path.join(output_folder, os.path.basename(image_path).replace(".png", "_heatmap.png"))
-            save_heatmap(original_image, heatmap, save_path)
-        except Exception as e:
-            print(f"Ошибка обработки {image_path}: {e}")
+    # Обратный проход
+    model.zero_grad()
+    one_hot = torch.zeros_like(output)
+    one_hot[0][target_class] = 1.0
+    output.backward(gradient=one_hot)
+
+    # Убедимся, что активации и градиенты получены
+    assert activations is not None and gradients is not None, "Градиенты не были вычислены!"
+
+    # Усредняем градиенты по патчам (исключаем cls token)
+    weights = torch.mean(gradients[:, 1:], dim=1)  # [batch, num_patches]
+
+    # Собираем карту Grad-CAM
+    grads_cam = torch.einsum('bn,bnd->bd', weights, activations[:, 1:])
+    grads_cam = F.relu(grads_cam)
+
+    # Ресайз и нормализация
+    grads_cam = grads_cam.reshape(-1, 14, 14)  # Для patch_size=16 (224/16=14)
+    grads_cam = grads_cam.detach().cpu().numpy()
+    grads_cam = cv2.resize(grads_cam, (img.shape[2], img.shape[3]))
+    grads_cam = (grads_cam - grads_cam.min()) / (grads_cam.max() - grads_cam.min() + 1e-8)
+
+    # Удаляем хуки
+    hook_forward.remove()
+    hook_backward.remove()
+
+    return grads_cam
+
+# Функция для загрузки и предобработки изображения
+def load_and_preprocess_image(image_path):
+    # Загрузка изображения
+    image = Image.open(image_path).convert('RGB')
+
+    # Преобразования для изображения
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),  # Приводим к размеру, который принимает модель
+        transforms.ToTensor(),  # Преобразуем в тензор
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])  # Нормализация
+    ])
+
+    # Применяем преобразования
+    img_tensor = transform(image).unsqueeze(0)  # Добавляем batch dimension
+    return img_tensor
+
+
+# Пути к изображениям
+image_paths = [
+    "/mnt/data/cfi_manual_glaucoma/train/glaucoma/17255_20240925124036747.png"
+]
+
+# Директория для сохранения изображений
+output_dir = "/mnt/data/"
+os.makedirs(output_dir, exist_ok=True)
+
+# Применение Grad-CAM к каждому изображению
+for image_path in image_paths:
+    # Загрузка и предобработка изображения
+    img_tensor = load_and_preprocess_image(image_path)
+
+    # Определение целевого класса (например, 1 для класса 1)
+    target_class = 1  # Меняйте в зависимости от задачи
+
+    # Применение Grad-CAM
+    grad_cam_map = grad_cam_vit(model, img_tensor, target_class)
+
+    # Визуализация и сохранение
+    plt.figure(figsize=(10, 5))
+
+    # Оригинальное изображение
+    plt.subplot(1, 2, 1)
+    plt.imshow(Image.open(image_path))
+    plt.title("Original Image")
+    plt.axis('off')
+
+    # Карта Grad-CAM
+    plt.subplot(1, 2, 2)
+    plt.imshow(grad_cam_map, cmap='jet')
+    plt.title("Grad-CAM")
+    plt.axis('off')
+
+    # Сохранение изображений
+    image_filename = os.path.basename(image_path)
+    grad_cam_filename = f"grad_cam_{image_filename}"
+
+    # Сохраняем визуализации
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, grad_cam_filename))
+    plt.close()
+
+print(f"Grad-CAM images saved to: {output_dir}")
