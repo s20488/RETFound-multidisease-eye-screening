@@ -70,22 +70,22 @@ def grad_cam_vit(model, img, target_class):
     one_hot[0][target_class] = 1.0
     output.backward(gradient=one_hot)
 
-    # Убедимся, что данные захвачены
+    # Проверка наличия данных
     assert activations is not None and gradients is not None
 
-    # Игнорируем cls token (берем только патчи)
+    # Игнорируем cls token
     gradients = gradients[:, 1:]  # [batch, num_patches, dim]
     activations = activations[:, 1:]  # [batch, num_patches, dim]
 
-    # Вычисляем веса для каждого патча
+    # Вычисляем веса (среднее по фичам)
     weights = torch.mean(gradients, dim=2)  # [batch, num_patches]
 
     # Собираем карту активаций
-    grads_cam = torch.einsum('bn,bn->b', weights, activations.norm(dim=2))  # [batch]
+    grads_cam = torch.einsum('bn,bn->bn', weights, activations.norm(dim=2))  # [batch, num_patches]
     grads_cam = F.relu(grads_cam)
 
-    # Ресайз и нормализация
-    grads_cam = weights[0].reshape(14, 14).cpu().numpy()  # Для patch_size=16 (224x224 -> 14x14)
+    # Ресайз в 2D
+    grads_cam = grads_cam[0].reshape(14, 14).cpu().numpy()  # Для 224x224 и patch_size=16
     grads_cam = cv2.resize(grads_cam, (img.shape[2], img.shape[3]))
     grads_cam = (grads_cam - grads_cam.min()) / (grads_cam.max() - grads_cam.min() + 1e-8)
 
@@ -95,57 +95,42 @@ def grad_cam_vit(model, img, target_class):
 
     return grads_cam
 
-# Функция для загрузки и предобработки изображения
+
+# Загрузка изображения
 def load_and_preprocess_image(image_path):
-    # Загрузка изображения
-    image = Image.open(image_path).convert('RGB')
-
-    # Преобразования для изображения
     transform = transforms.Compose([
-        transforms.Resize((224, 224)),  # Приводим к размеру, который принимает модель
-        transforms.ToTensor(),  # Преобразуем в тензор
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Нормализация
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5])
     ])
-
-    # Применяем преобразования
-    img_tensor = transform(image).unsqueeze(0)  # Добавляем batch dimension
-    return img_tensor
-
+    image = Image.open(image_path).convert('RGB')
+    return transform(image).unsqueeze(0)
 
 # Пути к изображениям
-image_paths = [
-    "/mnt/data/cfi_manual_glaucoma/train/glaucoma/17255_20240925124036747.png"
-]
+image_path = "/mnt/data/cfi_manual_hypertension_0.1/train/1/17947_20230801130127534.png"
+img_tensor = load_and_preprocess_image(image_path)
 
-# Директория для сохранения изображений
+# Предсказание класса
+with torch.no_grad():
+    output = model(img_tensor)
+pred_class = output.argmax(dim=1).item()
+
+# Получение Grad-CAM
+grad_cam_map = grad_cam_vit(model, img_tensor, pred_class)
+
+# Наложение карты на изображение
+plt.figure(figsize=(10, 5))
+plt.imshow(Image.open(image_path))
+plt.imshow(grad_cam_map, cmap='jet', alpha=0.5)
+plt.axis('off')
+
+# Сохраняем изображение с Grad-CAM
 output_dir = "/mnt/data/"
 os.makedirs(output_dir, exist_ok=True)
 
-# Применение Grad-CAM к каждому изображению
-for image_path in image_paths:
-    img_tensor = load_and_preprocess_image(image_path)
-    target_class = 1  # Укажите ваш целевой класс
+grad_cam_filename = os.path.join(output_dir, "grad_cam_output.png")
+plt.tight_layout()
+plt.savefig(grad_cam_filename)
+plt.close()
 
-    grad_cam_map = grad_cam_vit(model, img_tensor, target_class)
-
-    plt.figure(figsize=(10, 5))
-    plt.subplot(1, 2, 1)
-    plt.imshow(Image.open(image_path))
-    plt.title("Original")
-    plt.axis('off')
-
-    plt.subplot(1, 2, 2)
-    plt.imshow(grad_cam_map, cmap='jet', alpha=0.5)
-    plt.title("Grad-CAM")
-    plt.axis('off')
-
-    # Сохранение изображений
-    image_filename = os.path.basename(image_path)
-    grad_cam_filename = f"grad_cam_{image_filename}"
-
-    # Сохраняем визуализации
-    plt.tight_layout()
-    plt.savefig(os.path.join(output_dir, grad_cam_filename))
-    plt.close()
-
-print(f"Grad-CAM images saved to: {output_dir}")
+print(f"Grad-CAM image saved to: {grad_cam_filename}")
