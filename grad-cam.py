@@ -107,7 +107,7 @@ def load_and_preprocess_image(image_path):
     return transform(image).unsqueeze(0)
 
 # Пути к изображениям
-image_path = "/mnt/data/cfi_manual_cataract/train/cataract/15699_20230725134806527.png"
+image_path = "/mnt/data/cfi_manual_glaucoma/train/normal/17845_20240614122629638.png"
 img_tensor = load_and_preprocess_image(image_path)
 
 # Предсказание класса
