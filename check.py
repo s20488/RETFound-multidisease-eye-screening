@@ -8,12 +8,10 @@ cataract_dir = os.path.join(base_path, "cataract")
 normal_dir = os.path.join(base_path, "normal")
 
 # Параметры подписей
-FONT_SIZE = 150  # Увеличен размер шрифта
-TEXT_HEIGHT = 150  # Высота области для текста
-FONT_COLOR = (255, 255, 255)  # Белый цвет текста
-BACKGROUND_COLOR = (50, 50, 50)  # Темно-серый фон для текста
-BORDER_WIDTH = 6  # Толщина рамки вокруг текста
-TEXT_PADDING = 30  # Отступ текста от краев
+FONT_SIZE = 20
+TEXT_HEIGHT = 30  # Высота области для текста
+FONT_COLOR = (255, 255, 255)  # Белый цвет
+BACKGROUND_COLOR = (0, 0, 0)  # Черный фон для текста
 
 
 def get_random_images(folder, num=5):
@@ -33,34 +31,17 @@ def add_caption(img, text):
     draw = ImageDraw.Draw(new_img)
 
     try:
-        # Попробуем загрузить шрифт (можно указать путь к своему шрифту)
         font = ImageFont.truetype("arial.ttf", FONT_SIZE)
-    except Exception as e:
-        print(f"Не удалось загрузить шрифт. Используется стандартный шрифт. Ошибка: {e}")
-        font = ImageFont.load_default()  # Если шрифт не найден, используем стандартный
+    except:
+        font = ImageFont.load_default()
 
     # Рассчитываем позицию текста
-    text_width, text_height = draw.textsize(text, font=font)
-    text_x = (img.width - text_width) // 2
-    text_y = img.height + (TEXT_HEIGHT - text_height) // 2  # Корректировка по вертикали
+    text_width = draw.textlength(text, font=font)
+    x = (img.width - text_width) // 2
+    y = img.height + (TEXT_HEIGHT - FONT_SIZE) // 2
 
-    # Рисуем фон для текста
-    draw.rectangle(
-        [
-            (text_x - TEXT_PADDING, img.height),
-            (text_x + text_width + TEXT_PADDING, new_height)
-        ],
-        fill=BACKGROUND_COLOR
-    )
-
-    # Рисуем текст с обводкой
-    for dx in [-BORDER_WIDTH, BORDER_WIDTH]:
-        for dy in [-BORDER_WIDTH, BORDER_WIDTH]:
-            draw.text((text_x + dx, text_y + dy), text, font=font, fill=(0, 0, 0))
-
-    # Основной текст
-    draw.text((text_x, text_y), text, font=font, fill=FONT_COLOR)
-
+    # Рисуем текст
+    draw.text((x, y), text, font=font, fill=FONT_COLOR)
     return new_img
 
 
