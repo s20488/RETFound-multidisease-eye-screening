@@ -107,7 +107,7 @@ def load_and_preprocess_image(image_path):
     return transform(image).unsqueeze(0)
 
 # Пути к изображениям
-image_path = "/mnt/data/cfi_manual_diabetes/train/diabetes/17269_20240131131623528.png"
+image_path = "/mnt/data/cfi_manual_diabetes/train/diabetes/15608_20230901092548489.png"
 img_tensor = load_and_preprocess_image(image_path)
 
 # Предсказание класса
