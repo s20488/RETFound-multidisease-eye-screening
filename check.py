@@ -8,7 +8,7 @@ cataract_dir = os.path.join(base_path, "cataract")
 normal_dir = os.path.join(base_path, "normal")
 
 # Параметры подписей
-FONT_SIZE = 60
+FONT_SIZE = 100
 TEXT_HEIGHT = 80  # Высота области для текста
 FONT_COLOR = (255, 255, 255)  # Белый цвет
 BACKGROUND_COLOR = (0, 0, 0)  # Черный фон для текста
