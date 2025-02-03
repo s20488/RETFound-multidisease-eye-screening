@@ -3,7 +3,7 @@ from PIL import Image, ImageDraw, ImageFont
 import random
 
 # Настройка путей
-base_path = "/mnt/data/cfi_manual/cataract/train"
+base_path = "/mnt/data/cfi_manual_cataract/cataract/train"
 cataract_dir = os.path.join(base_path, "cataract")
 normal_dir = os.path.join(base_path, "normal")
 
