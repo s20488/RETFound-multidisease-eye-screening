@@ -44,24 +44,22 @@ print("Model = %s" % str(model))
 def grad_cam_vit(model, img, target_class):
     model.eval()
 
-    # Получаем активации и градиенты последнего блока
     activations = None
     gradients = None
 
-    # Хук для захвата активаций
+    # Хук для активаций (прямой проход)
     def forward_hook(module, input, output):
         nonlocal activations
-        activations = output
-        activations.retain_grad()  # Важно: сохраняем градиенты для активаций
+        activations = output.detach()  # [batch, num_patches+1, dim]
 
-    # Хук для захвата градиентов
+    # Хук для градиентов (обратный проход)
     def backward_hook(module, grad_input, grad_output):
         nonlocal gradients
-        gradients = grad_output[0]
+        gradients = grad_output[0].detach()  # [batch, num_patches+1, dim]
 
     # Регистрируем хуки
     hook_forward = model.blocks[-1].register_forward_hook(forward_hook)
-    hook_backward = model.blocks[-1].register_backward_hook(backward_hook)
+    hook_backward = model.blocks[-1].register_full_backward_hook(backward_hook)
 
     # Прямой проход
     output = model(img)
@@ -72,19 +70,22 @@ def grad_cam_vit(model, img, target_class):
     one_hot[0][target_class] = 1.0
     output.backward(gradient=one_hot)
 
-    # Убедимся, что активации и градиенты получены
-    assert activations is not None and gradients is not None, "Градиенты не были вычислены!"
+    # Убедимся, что данные захвачены
+    assert activations is not None and gradients is not None
 
-    # Усредняем градиенты по патчам (исключаем cls token)
-    weights = torch.mean(gradients[:, 1:], dim=1)  # [batch, num_patches]
+    # Игнорируем cls token (берем только патчи)
+    gradients = gradients[:, 1:]  # [batch, num_patches, dim]
+    activations = activations[:, 1:]  # [batch, num_patches, dim]
 
-    # Собираем карту Grad-CAM
-    grads_cam = torch.einsum('bn,bnd->bd', weights, activations[:, 1:])
+    # Вычисляем веса для каждого патча
+    weights = torch.mean(gradients, dim=2)  # [batch, num_patches]
+
+    # Собираем карту активаций
+    grads_cam = torch.einsum('bn,bn->b', weights, activations.norm(dim=2))  # [batch]
     grads_cam = F.relu(grads_cam)
 
     # Ресайз и нормализация
-    grads_cam = grads_cam.reshape(-1, 14, 14)  # Для patch_size=16 (224/16=14)
-    grads_cam = grads_cam.detach().cpu().numpy()
+    grads_cam = weights[0].reshape(14, 14).cpu().numpy()  # Для patch_size=16 (224x224 -> 14x14)
     grads_cam = cv2.resize(grads_cam, (img.shape[2], img.shape[3]))
     grads_cam = (grads_cam - grads_cam.min()) / (grads_cam.max() - grads_cam.min() + 1e-8)
 
