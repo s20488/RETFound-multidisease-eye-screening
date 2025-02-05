@@ -16,10 +16,10 @@ class Args:
 
 # Paths to model weights for each disease
 WEIGHTS_PATHS = {
-    "Nadciśnienie": "RETFound_cfp_weights.pth",
-    "Cukrzyca": "RETFound_cfp_weights.pth",
-    "Zaćma": "RETFound_cfp_weights.pth",
-    "Jaskra": "RETFound_cfp_weights.pth",
+    "Nadciśnienie": "checkpoint-best-hypertansion.pth",
+    "Cukrzyca": "pretrained_weights/checkpoint-best-diabetes.pth",
+    "Zaćma": "pretrained_weights/checkpoint-best-catarct.pth",
+    "Jaskra": "pretrained_weights/checkpoint-best-glaucoma.pth",
 }
 
 

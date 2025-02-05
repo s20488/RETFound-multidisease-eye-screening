@@ -22,4 +22,4 @@ world_size: 1
 pin_mem: True
 data_path: /mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/REFUGE2/
 task: ./results/finetune_REFUGE2/
-finetune: ./RETFound_cfp_weights.pth
+finetune: ./pretrained_weights/RETFound_cfp_weights.pth

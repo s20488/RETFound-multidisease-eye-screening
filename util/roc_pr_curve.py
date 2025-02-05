@@ -7,15 +7,6 @@ from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 @torch.no_grad()
 def plot_roc_curve(data_loader, model, device, num_class, task):
-    """
-    Строит ROC-кривую для бинарной или многоклассовой классификации.
-
-    :param data_loader: DataLoader с входными данными и метками
-    :param model: Модель для предсказания
-    :param device: Устройство (например, 'cuda' или 'cpu')
-    :param num_class: Число классов
-    :param task: Имя папки для сохранения результатов
-    """
     model.eval()
     true_labels = []
     predicted_probs = []
@@ -41,7 +32,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
 
     plt.figure()
 
-    if num_class > 2:  # Многоклассовая классификация
+    if num_class > 2:
         true_labels_onehot = np.eye(num_class)[true_labels]
 
         fpr = {}
@@ -52,11 +43,9 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
             fpr[i], tpr[i], _ = roc_curve(true_labels_onehot[:, i], predicted_probs[:, i])
             roc_auc[i] = auc(fpr[i], tpr[i])
 
-        # Микро-усреднение
         fpr["micro"], tpr["micro"], _ = roc_curve(true_labels_onehot.ravel(), predicted_probs.ravel())
         roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
 
-        # Макро-усреднение
         all_fpr = np.unique(np.concatenate([fpr[i] for i in range(num_class)]))
         mean_tpr = np.zeros_like(all_fpr)
 
@@ -68,15 +57,12 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         tpr["macro"] = mean_tpr
         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
 
-        # Построение графиков для каждого класса
         for i in range(num_class):
             plt.plot(fpr[i], tpr[i], label=f'{class_names[i]} (AUC = {roc_auc[i]:.2f})')
 
-        # Построение микро- и макро-усредненных кривых
         plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
-    else:  # Бинарная классификация
-        # Выбираем вероятности для положительного класса (обычно класс 1)
+    else:
         positive_probs = predicted_probs[:, 1]
         fpr, tpr, _ = roc_curve(true_labels, positive_probs)
         roc_auc = auc(fpr, tpr)
@@ -89,7 +75,6 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     plt.legend(loc='lower right', fontsize='small')
     plt.grid()
 
-    # Сохранение графика
     os.makedirs(task, exist_ok=True)
     save_path = os.path.join(task, "roc_curve.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
@@ -98,15 +83,6 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
 
 @torch.no_grad()
 def plot_pr_curve(data_loader, model, device, num_class, task):
-    """
-    Строит Precision-Recall кривую для бинарной или многоклассовой классификации.
-
-    :param data_loader: DataLoader с входными данными и метками
-    :param model: Модель для предсказания
-    :param device: Устройство (например, 'cuda' или 'cpu')
-    :param num_class: Число классов
-    :param task: Имя папки для сохранения результатов
-    """
     model.eval()
     true_labels = []
     predicted_probs = []
@@ -132,7 +108,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     plt.figure()
 
-    if num_class > 2:  # Многоклассовая классификация
+    if num_class > 2:
         true_labels_onehot = np.eye(num_class)[true_labels]
 
         precision = {}
@@ -143,11 +119,9 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
             precision[i], recall[i], _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
             pr_auc[i] = auc(recall[i], precision[i])
 
-        # Микро-усреднение
         precision["micro"], recall["micro"], _ = precision_recall_curve(true_labels_onehot.ravel(), predicted_probs.ravel())
         pr_auc["micro"] = auc(recall["micro"], precision["micro"])
 
-        # Макро-усреднение
         all_recall = np.unique(np.concatenate([recall[i] for i in range(num_class)]))
         mean_precision = np.zeros_like(all_recall)
 
@@ -164,8 +138,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})', linestyle='--')
         plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
-    else:  # Бинарная классификация
-        # Выбираем вероятности для положительного класса (обычно класс 1)
+    else:
         positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
@@ -177,7 +150,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.legend(loc='lower left', fontsize='small')
     plt.grid()
 
-    # Сохранение графика
     os.makedirs(task, exist_ok=True)
     save_path = os.path.join(task, "precision_recall_curve.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
