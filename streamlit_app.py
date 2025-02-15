@@ -57,7 +57,7 @@ def load_model(weights_path):
         global_pool=True,
     )
 
-    checkpoint = torch.load(weights_path, map_location='cpu')
+    checkpoint = torch.load(weights_path, map_location=device)
     checkpoint_model = checkpoint['model']
     state_dict = model.state_dict()
 
