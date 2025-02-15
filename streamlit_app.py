@@ -115,11 +115,12 @@ def main():
 
             # Create an Args object
             args = Args()
-            result = predict(image, model, args)  # Pass args to predict
-            if result:
-                st.write(f"Wynik dla choroby '{disease}': **True** (Choroba wykryta)")
+            prediction, probability = predict(image, model, args)
+            if prediction:
+                st.write(f"Результат для заболевания '{disease}': **True** (Заболевание обнаружено)")
             else:
-                st.write(f"Wynik dla choroby '{disease}': **False** (Choroba niewykryta)")
+                st.write(f"Результат для заболевания '{disease}': **False** (Заболевание не обнаружено)")
+            st.write(f"Вероятность: {probability:.4f}")
 
 
 # Run the application
