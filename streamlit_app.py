@@ -16,10 +16,10 @@ class Args:
 
 # Paths to model weights for each disease
 WEIGHTS_PATHS = {
-    "Nadciśnienie": "checkpoint-best-hypertansion.pth",
-    "Cukrzyca": "pretrained_weights/checkpoint-best-diabetes.pth",
-    "Zaćma": "pretrained_weights/checkpoint-best-catarct.pth",
-    "Jaskra": "pretrained_weights/checkpoint-best-glaucoma.pth",
+    "Nadciśnienie": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_hypertension_AHA/checkpoint-best.pth",
+    "Cukrzyca": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_diabetes/checkpoint-best.pth",
+    "Zaćma": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_cataract/checkpoint-best.pth",
+    "Jaskra": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_glaucoma/checkpoint-best.pth",
 }
 
 
