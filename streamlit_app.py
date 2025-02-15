@@ -56,6 +56,7 @@ def load_model(weights_path):
 
     # Load the checkpoint into the model
     msg = model.load_state_dict(checkpoint_model, strict=False)
+    print("Missing keys:", msg.missing_keys)
     assert set(msg.missing_keys) == {'head.weight', 'head.bias', 'fc_norm.weight', 'fc_norm.bias'}
 
     trunc_normal_(model.head.weight, std=2e-5)
