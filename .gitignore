@@ -147,5 +147,5 @@ internal_IDRiD
 finetune_IDRiD
 
 # Datasets Jupyter processing
-/datasets_processing/private_dataset/bialystok_dataset/
+/datasets_processing/private_dataset/bialystok_dataset/dataset_distribution.py
 /pretrained_weights/
