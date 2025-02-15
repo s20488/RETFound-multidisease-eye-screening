@@ -117,10 +117,10 @@ def main():
             args = Args()
             prediction, probability = predict(image, model, args)
             if prediction:
-                st.write(f"Результат для заболевания '{disease}': **True** (Заболевание обнаружено)")
+                st.write(f"Wynik dla choroby '{disease}': **True** (Choroba wykryta)")
             else:
-                st.write(f"Результат для заболевания '{disease}': **False** (Заболевание не обнаружено)")
-            st.write(f"Вероятность: {probability:.4f}")
+                st.write(f"Wynik dla choroby '{disease}': **False** (Choroba niewykryta)")
+            st.write(f"Prawdopodobieństwo: {probability:.4f}")
 
 
 # Run the application
