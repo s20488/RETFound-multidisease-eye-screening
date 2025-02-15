@@ -9,6 +9,7 @@ from timm.models.vision_transformer import trunc_normal_
 import random
 import numpy as np
 
+
 # Ustawienie seeda dla reprodukowalności
 def set_seed(seed):
     torch.manual_seed(seed)
@@ -18,14 +19,17 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-set_seed(42)  # Ustalamy seed
 
-# Uproszczona klasa do przekazywania parametrów
+set_seed(42)
+
+
+# A simplified class for passing parameters
 class Args:
     def __init__(self):
         self.input_size = 224  # Rozmiar obrazu wejściowego
 
-# Ścieżki do wag modelu dla każdej choroby
+
+# Paths to model weights for each disease
 WEIGHTS_PATHS = {
     "Nadciśnienie": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_hypertension_AHA/checkpoint-best.pth",
     "Cukrzyca": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_diabetes/checkpoint-best.pth",
@@ -33,16 +37,19 @@ WEIGHTS_PATHS = {
     "Jaskra": "/mnt/data/Anastasiia_Ponkratova/RETFound_MAE/results/finetune_cfi_manual_glaucoma/checkpoint-best.pth",
 }
 
-# Sprawdzenie istnienia plików wag
+
+# Check if weight files exist
 def check_weights_files(weights_paths):
     for disease, path in weights_paths.items():
         if not os.path.exists(path):
             st.error(f"Plik wag dla choroby '{disease}' nie został znaleziony: {path}")
             st.stop()
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# Ładowanie modelu z podanymi wagami
+
+# Load the model with the given weights
 def load_model(weights_path):
     model = models_vit.__dict__['vit_large_patch16'](
         num_classes=2,
@@ -54,7 +61,7 @@ def load_model(weights_path):
     checkpoint_model = checkpoint['model']
     state_dict = model.state_dict()
 
-    # Usuwanie niezgodnych kluczy z checkpoint
+    # Remove incompatible keys from the checkpoint
     for k in ['head.weight', 'head.bias']:
         if k in checkpoint_model and checkpoint_model[k].shape != state_dict[k].shape:
             print(f"Usuwanie klucza {k} z wczytanego modelu")
@@ -62,39 +69,37 @@ def load_model(weights_path):
 
     interpolate_pos_embed(model, checkpoint_model)
 
-    # Inicjalizacja head.weight z ustalonym seedem
     trunc_normal_(model.head.weight, std=2e-5)
 
-    # Ładowanie wag do modelu
     model.load_state_dict(checkpoint_model, strict=False)
     model.to(device)
     return model
 
-# Przewidywanie choroby na podstawie obrazu
+
+# Predict disease from the input image
 def predict(image, model, args):
-    # Przekształcenie obrazu
+    # Create a transformation pipeline for the image
     transform = util.datasets.build_transform(is_train=False, args=args)
     image_tensor = transform(image).unsqueeze(0).to(device)
 
-    # Przełączamy model w tryb inferencji
     model.eval()
     with torch.no_grad():
         output = model(image_tensor)
 
-    # Obliczanie prawdopodobieństwa i przewidywania
     probability = torch.sigmoid(output[:, 1]).item()
     prediction = probability > 0.5
 
     return prediction, probability
 
-# Główna aplikacja Streamlit
+
+# Main Streamlit application
 def main():
     st.title("Analiza chorób dna oka")
 
-    # Wybór choroby
+    # Disease selection dropdown
     disease = st.selectbox("Wybierz chorobę", list(WEIGHTS_PATHS.keys()))
 
-    # Przesyłanie obrazu
+    # Image uploader
     uploaded_file = st.file_uploader("Prześlij obraz dna oka", type=["jpg", "jpeg", "png"])
 
     if uploaded_file is not None:
@@ -103,23 +108,21 @@ def main():
         with col2:
             st.image(image, caption='Przesłany obraz', use_column_width=True)
 
-        # Przycisk analizy
+        # Analyze button
         if st.button("Analizuj"):
             weights_path = WEIGHTS_PATHS[disease]
             model = load_model(weights_path)
 
-            # Tworzymy obiekt Args
+            # Create an Args object
             args = Args()
-            prediction, probability = predict(image, model, args)
-
-            # Wyświetlamy wynik
-            st.write(f"Prawdopodobieństwo dla choroby '{disease}': {probability:.4f}")
-            if prediction:
-                st.write(f"Wynik: **True** (Choroba wykryta)")
+            result = predict(image, model, args)  # Pass args to predict
+            if result:
+                st.write(f"Wynik dla choroby '{disease}': **True** (Choroba wykryta)")
             else:
-                st.write(f"Wynik: **False** (Choroba niewykryta)")
+                st.write(f"Wynik dla choroby '{disease}': **False** (Choroba niewykryta)")
 
-# Uruchomienie aplikacji
+
+# Run the application
 if __name__ == "__main__":
     check_weights_files(WEIGHTS_PATHS)
     main()
