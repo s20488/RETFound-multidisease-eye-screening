@@ -86,7 +86,7 @@ def predict(image, model, args):
     with torch.no_grad():
         output = model(image_tensor)
 
-    probability = torch.sigmoid(output[:, 1]).item()
+    probability = torch.sigmoid(output[:, 0]).item()
     prediction = probability > 0.5
 
     return prediction, probability
