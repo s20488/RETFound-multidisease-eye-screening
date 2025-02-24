@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 
