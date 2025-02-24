@@ -67,7 +67,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         fpr, tpr, _ = roc_curve(true_labels, positive_probs)
         roc_auc = auc(fpr, tpr)
 
-        plt.plot(fpr, tpr, label=f'Class 1 (AUC = {roc_auc:.2f})')
+        plt.plot(fpr, tpr, label=f'{class_names[0]} (AUC = {roc_auc[0]:.2f})')
 
     plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random classifier')
     plt.xlabel('1 - Specificity')
@@ -143,7 +143,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'Class 1 (AUC = {pr_auc:.2f})')
+        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_aucp[0]:.2f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
