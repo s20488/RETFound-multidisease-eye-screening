@@ -150,7 +150,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     else:
         # Для бинарной классификации
-        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
+        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
