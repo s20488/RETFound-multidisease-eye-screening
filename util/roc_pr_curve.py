@@ -139,11 +139,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})', linestyle='--')
         plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     else:
-        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
+        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_aucp[0]:.2f})')
+        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.2f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
