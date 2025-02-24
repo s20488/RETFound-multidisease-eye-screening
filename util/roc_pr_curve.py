@@ -63,7 +63,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
     else:
-        positive_probs = predicted_probs[:, 0]
+        positive_probs = predicted_probs[:, 1]
         fpr, tpr, _ = roc_curve(true_labels, positive_probs)
         roc_auc = auc(fpr, tpr)
 
@@ -93,6 +93,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
+    # Сортируем классы по алфавиту
+    sorted_class_names = sorted(class_names)
+    label_encoder = LabelEncoder()
+    label_encoder.fit(sorted_class_names)  # Указываем порядок классов
+
     for batch in data_loader:
         images = batch[0].to(device, non_blocking=True)
         targets = batch[-1].to(device, non_blocking=True)
@@ -100,7 +105,8 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         outputs = model(images)
         softmax_probs = torch.nn.Softmax(dim=1)(outputs) if num_class > 2 else torch.sigmoid(outputs)
 
-        true_labels.extend(targets.cpu().numpy())
+        # Преобразуем метки в числа с учетом алфавитного порядка
+        true_labels.extend(label_encoder.transform(targets.cpu().numpy()))
         predicted_probs.extend(softmax_probs.cpu().numpy())
 
     true_labels = np.array(true_labels)
@@ -109,6 +115,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.figure()
 
     if num_class > 2:
+        # Создаем one-hot encoding с учетом алфавитного порядка
         true_labels_onehot = np.eye(num_class)[true_labels]
 
         precision = {}
@@ -134,16 +141,17 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         pr_auc["macro"] = auc(recall["macro"], precision["macro"])
 
         for i in range(num_class):
-            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.2f})')
+            plt.plot(recall[i], precision[i], label=f'{sorted_class_names[i]} (AUC = {pr_auc[i]:.2f})')
 
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})', linestyle='--')
         plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     else:
-        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
+        # Для бинарной классификации
+        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.2f})')
+        plt.plot(recall, precision, label=f'{sorted_class_names[0]} (AUC = {pr_auc:.2f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
