@@ -335,6 +335,10 @@ def main(args):
         test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
                                        num_class=args.nb_classes)
 
+        print("Number of classes:", args.nb_classes)
+        print("Task:", args.task)
+        print("Data loader test size:", len(data_loader_test.dataset))
+
         plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         plot_pr_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         exit(0)
