@@ -2,7 +2,6 @@ import os
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import LabelEncoder
 from sklearn.metrics import roc_curve, auc, precision_recall_curve
 
 
@@ -94,9 +93,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
-    # Сортируем классы по алфавиту
-    sorted_class_names = sorted(class_names)
-
     for batch in data_loader:
         images = batch[0].to(device, non_blocking=True)
         targets = batch[-1].to(device, non_blocking=True)
@@ -104,25 +100,15 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         outputs = model(images)
         softmax_probs = torch.nn.Softmax(dim=1)(outputs) if num_class > 2 else torch.sigmoid(outputs)
 
-        # Преобразуем метки в numpy и добавляем в список
         true_labels.extend(targets.cpu().numpy())
         predicted_probs.extend(softmax_probs.cpu().numpy())
 
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
-    # Проверяем, что метки находятся в допустимом диапазоне
-    if true_labels.min() < 0 or true_labels.max() >= num_class:
-        raise ValueError(f"Метки классов должны быть в диапазоне [0, {num_class - 1}], но получены метки от {true_labels.min()} до {true_labels.max()}.")
-
     plt.figure()
 
     if num_class > 2:
-        print("True labels:", true_labels[:10])
-        print("Predicted probs:", predicted_probs[:10])
-        print("Shape of predicted_probs:", predicted_probs.shape)
-
-        # Создаем one-hot encoding
         true_labels_onehot = np.eye(num_class)[true_labels]
 
         precision = {}
@@ -148,17 +134,16 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         pr_auc["macro"] = auc(recall["macro"], precision["macro"])
 
         for i in range(num_class):
-            plt.plot(recall[i], precision[i], label=f'{sorted_class_names[i]} (AUC = {pr_auc[i]:.2f})')
+            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.2f})')
 
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})', linestyle='--')
         plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     else:
-        # Для бинарной классификации
-        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
+        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'{sorted_class_names[0]} (AUC = {pr_auc:.2f})')
+        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.2f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')

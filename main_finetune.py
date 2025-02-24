@@ -30,6 +30,7 @@ import util.lr_decay as lrd
 import util.misc as misc
 from util.datasets import build_dataset
 from util.pos_embed import interpolate_pos_embed
+from sklearn.preprocessing import LabelEncoder
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
 
 import models_vit
@@ -180,6 +181,9 @@ def main(args):
     dataset_train = build_dataset(is_train='train', args=args)
     dataset_val = build_dataset(is_train='val', args=args)
     dataset_test = build_dataset(is_train='test', args=args)
+
+    label_encoder = LabelEncoder()
+    dataset_test.targets = label_encoder.fit_transform(dataset_test.targets)
 
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
@@ -334,10 +338,6 @@ def main(args):
     if args.eval:
         test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
                                        num_class=args.nb_classes)
-
-        print("Number of classes:", args.nb_classes)
-        print("Task:", args.task)
-        print("Data loader test size:", len(data_loader_test.dataset))
 
         plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         plot_pr_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
