@@ -96,8 +96,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     # Сортируем классы по алфавиту
     sorted_class_names = sorted(class_names)
-    label_encoder = LabelEncoder()
-    label_encoder.fit(sorted_class_names)  # Указываем порядок классов
 
     for batch in data_loader:
         images = batch[0].to(device, non_blocking=True)
@@ -106,17 +104,21 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         outputs = model(images)
         softmax_probs = torch.nn.Softmax(dim=1)(outputs) if num_class > 2 else torch.sigmoid(outputs)
 
-        # Преобразуем метки в числа с учетом алфавитного порядка
-        true_labels.extend(label_encoder.transform(targets.cpu().numpy()))
+        # Преобразуем метки в numpy и добавляем в список
+        true_labels.extend(targets.cpu().numpy())
         predicted_probs.extend(softmax_probs.cpu().numpy())
 
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    # Проверяем, что метки находятся в допустимом диапазоне
+    if true_labels.min() < 0 or true_labels.max() >= num_class:
+        raise ValueError(f"Метки классов должны быть в диапазоне [0, {num_class - 1}], но получены метки от {true_labels.min()} до {true_labels.max()}.")
+
     plt.figure()
 
     if num_class > 2:
-        # Создаем one-hot encoding с учетом алфавитного порядка
+        # Создаем one-hot encoding
         true_labels_onehot = np.eye(num_class)[true_labels]
 
         precision = {}
