@@ -3,9 +3,9 @@ batch_size: 64
 world_size: 4
 model: vit_large_patch16
 nb_classes: 2
-data_path: /mnt/data/cfi_manual_hypertension_AHA_without_diabetes/
-task: ./results/finetune_cfi_manual_hypertension_AHA_without_diabetes/
-resume: ./results/finetune_cfi_manual_hypertension_AHA_without_diabetes/checkpoint-best-diabetes.pth
+data_path: /mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/cfi_manual_hypertension_AHA/
+task: ./results/finetune_cfi_manual_hypertension_AHA_pr/
+resume: ./results/finetune_cfi_manual_hypertension_AHA/checkpoint-best.pth
 input_size: 224
 pin_mem: True
 num_workers: 24
