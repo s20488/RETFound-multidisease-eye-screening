@@ -116,34 +116,45 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         pr_auc = {}
 
         for i in range(num_class):
+            # Рассчитываем Precision, Recall и AUC-PR для каждого класса
             precision[i], recall[i], _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
             pr_auc[i] = auc(recall[i], precision[i])
 
+            # Рассчитываем AUC-PR через average_precision_score для проверки
+            auc_pr_score = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])
+            print(f"Class {class_names[i]} - AUC-PR (precision_recall_curve): {pr_auc[i]:.4f}, AUC-PR (average_precision_score): {auc_pr_score:.4f}")
+
+            # Строим кривую Precision-Recall для каждого класса
+            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.4f})')
+
+        # Микро-усреднение
         precision["micro"], recall["micro"], _ = precision_recall_curve(true_labels_onehot.ravel(), predicted_probs.ravel())
         pr_auc["micro"] = auc(recall["micro"], precision["micro"])
+        plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.4f})', linestyle='--')
 
+        # Макро-усреднение
         all_recall = np.unique(np.concatenate([recall[i] for i in range(num_class)]))
         mean_precision = np.zeros_like(all_recall)
-
         for i in range(num_class):
             mean_precision += np.interp(all_recall, recall[i][::-1], precision[i][::-1])
-
         mean_precision /= num_class
         recall["macro"] = all_recall
         precision["macro"] = mean_precision
         pr_auc["macro"] = auc(recall["macro"], precision["macro"])
+        plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.4f})', linestyle=':')
 
-        for i in range(num_class):
-            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.2f})')
-
-        plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})', linestyle='--')
-        plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})', linestyle=':')
     else:
+        # Для бинарной классификации
         positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
         pr_auc = auc(recall, precision)
 
-        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.2f})')
+        # Рассчитываем AUC-PR через average_precision_score для проверки
+        auc_pr_score = average_precision_score(true_labels, positive_probs)
+        print(f"Class {class_names[0]} - AUC-PR (precision_recall_curve): {pr_auc:.4f}, AUC-PR (average_precision_score): {auc_pr_score:.4f}")
+
+        # Строим кривую Precision-Recall
+        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.4f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')

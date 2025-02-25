@@ -182,9 +182,6 @@ def main(args):
     dataset_val = build_dataset(is_train='val', args=args)
     dataset_test = build_dataset(is_train='test', args=args)
 
-    label_encoder = LabelEncoder()
-    dataset_test.targets = label_encoder.fit_transform(dataset_test.targets)
-
     if True:  # args.distributed:
         num_tasks = misc.get_world_size()
         global_rank = misc.get_rank()
