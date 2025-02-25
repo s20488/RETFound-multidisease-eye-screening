@@ -106,6 +106,10 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    print("True labels:", true_labels[:10])
+    print("Predicted probs:", predicted_probs[:10])
+    print("Shape of predicted_probs:", predicted_probs.shape)
+
     plt.figure()
 
     if num_class > 2:
