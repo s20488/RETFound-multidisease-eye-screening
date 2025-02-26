@@ -90,6 +90,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     dataset = data_loader.dataset
     if hasattr(dataset, 'classes'):
         class_names = dataset.classes  # ["hypertension", "normal"]
+        print(f"Class names: {class_names}")  # Проверка порядка классов
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
@@ -111,20 +112,29 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    # Проверка формы и содержимого
+    print(f"True labels shape: {true_labels.shape}, content: {true_labels[:10]}")  # Первые 10 меток
+    print(f"Predicted probabilities shape: {predicted_probs.shape}, content: {predicted_probs[:10]}")  # Первые 10 вероятностей
+
     # Если метки — строки, преобразуем их в числовой формат
     if isinstance(true_labels[0], str):
         label_to_index = {label: idx for idx, label in enumerate(class_names)}
+        print(f"Label to index mapping: {label_to_index}")  # Проверка маппинга
         true_labels = np.array([label_to_index[label] for label in true_labels])
+        print(f"Converted true labels: {true_labels[:10]}")  # Первые 10 преобразованных меток
 
     # Преобразуем метки в one-hot encoding для многоклассовой классификации
     if num_class > 2:
         true_labels_onehot = np.eye(num_class)[true_labels]
+        print(f"One-hot encoded true labels: {true_labels_onehot[:10]}")  # Первые 10 one-hot меток
     else:
         # Для бинарной классификации используем метки как есть
         true_labels_onehot = true_labels
+        print(f"Binary true labels: {true_labels_onehot[:10]}")  # Первые 10 меток
 
     # Проверка наличия объектов обоих классов
     unique_labels = np.unique(true_labels)
+    print(f"Unique labels: {unique_labels}")  # Проверка уникальных меток
     if len(unique_labels) < 2:
         print(f"Ошибка: В данных только один класс ({unique_labels}). Невозможно рассчитать AUC-PR.")
         return
@@ -149,7 +159,17 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         # Для бинарной классификации используем average_precision_score
         # Определяем индекс класса "hypertension" (первый класс в списке)
         positive_class_index = 0  # "hypertension" соответствует индексу 0
-        positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
+        print(f"Positive class index: {positive_class_index}")  # Проверка индекса положительного класса
+
+        # Проверка формы predicted_probs
+        if predicted_probs.ndim == 2:
+            positive_probs = predicted_probs[:, positive_class_index]
+            print(f"Positive probabilities shape: {positive_probs.shape}, content: {positive_probs[:10]}")  # Первые 10 вероятностей
+        else:
+            positive_probs = predicted_probs
+            print(f"Positive probabilities (1D): {positive_probs[:10]}")  # Первые 10 вероятностей
+
+        # Рассчитываем AUC-PR
         auc_pr = average_precision_score(true_labels, positive_probs)
         print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr:.4f}")
 
