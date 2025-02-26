@@ -93,6 +93,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
+    # Собираем предсказания и истинные метки
     for batch in data_loader:
         images = batch[0].to(device, non_blocking=True)
         targets = batch[-1].to(device, non_blocking=True)
@@ -118,52 +119,35 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.figure()
 
     if num_class > 2:
-        precision = {}
-        recall = {}
-        pr_auc = {}
+        # Для многоклассовой классификации используем average_precision_score с average='macro'
+        auc_pr_macro = average_precision_score(true_labels_onehot, predicted_probs, average='macro')
+        print(f"Macro-average AUC-PR: {auc_pr_macro:.4f}")
 
+        # Рассчитываем AUC-PR для каждого класса отдельно
         for i in range(num_class):
-            # Рассчитываем Precision, Recall и AUC-PR для каждого класса
-            precision[i], recall[i], _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
-            pr_auc[i] = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])  # Используем average_precision_score
-
-            print(f"Class {class_names[i]} - AUC-PR (average_precision_score): {pr_auc[i]:.4f}")
+            auc_pr_class = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])
+            print(f"Class {class_names[i]} - AUC-PR: {auc_pr_class:.4f}")
 
             # Строим кривую Precision-Recall для каждого класса
-            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.4f})')
-
-        # Микро-усреднение
-        precision["micro"], recall["micro"], _ = precision_recall_curve(true_labels_onehot.ravel(), predicted_probs.ravel())
-        pr_auc["micro"] = average_precision_score(true_labels_onehot.ravel(), predicted_probs.ravel())  # Используем average_precision_score
-        plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.4f})', linestyle='--')
-
-        # Макро-усреднение
-        all_recall = np.unique(np.concatenate([recall[i] for i in range(num_class)]))
-        mean_precision = np.zeros_like(all_recall)
-        for i in range(num_class):
-            mean_precision += np.interp(all_recall, recall[i][::-1], precision[i][::-1])
-        mean_precision /= num_class
-        recall["macro"] = all_recall
-        precision["macro"] = mean_precision
-        pr_auc["macro"] = auc(recall["macro"], precision["macro"])
-        plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.4f})', linestyle=':')
+            precision, recall, _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
+            plt.plot(recall, precision, label=f'{class_names[i]} (AUC = {auc_pr_class:.4f})')
 
     else:
-        # Для бинарной классификации
+        # Для бинарной классификации используем average_precision_score
         positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
-        precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
-        pr_auc = average_precision_score(true_labels, positive_probs)  # Используем average_precision_score
-
-        print(f"Class {class_names[0]} - AUC-PR (average_precision_score): {pr_auc:.4f}")
+        auc_pr = average_precision_score(true_labels, positive_probs)
+        print(f"Class {class_names[0]} - AUC-PR: {auc_pr:.4f}")
 
         # Строим кривую Precision-Recall
-        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.4f})')
+        precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
+        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {auc_pr:.4f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.legend(loc='lower left', fontsize='small')
     plt.grid()
 
+    # Сохраняем график
     os.makedirs(task, exist_ok=True)
     save_path = os.path.join(task, "precision_recall_curve.png")
     plt.savefig(save_path, dpi=300, bbox_inches='tight')
