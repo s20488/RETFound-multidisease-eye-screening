@@ -89,7 +89,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     dataset = data_loader.dataset
     if hasattr(dataset, 'classes'):
-        class_names = dataset.classes
+        class_names = dataset.classes  # ["hypertension", "normal"]
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
@@ -110,6 +110,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
+
+    # Если метки — строки, преобразуем их в числовой формат
+    if isinstance(true_labels[0], str):
+        label_to_index = {label: idx for idx, label in enumerate(class_names)}
+        true_labels = np.array([label_to_index[label] for label in true_labels])
 
     # Преобразуем метки в one-hot encoding для многоклассовой классификации
     if num_class > 2:
@@ -142,13 +147,15 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     else:
         # Для бинарной классификации используем average_precision_score
-        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
+        # Определяем индекс класса "hypertension" (первый класс в списке)
+        positive_class_index = 0  # "hypertension" соответствует индексу 0
+        positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
         auc_pr = average_precision_score(true_labels, positive_probs)
-        print(f"Class {class_names[0]} - AUC-PR: {auc_pr:.4f}")
+        print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr:.4f}")
 
         # Строим кривую Precision-Recall
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
-        plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {auc_pr:.4f})')
+        plt.plot(recall, precision, label=f'{class_names[positive_class_index]} (AUC = {auc_pr:.4f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
