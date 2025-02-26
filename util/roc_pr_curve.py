@@ -106,6 +106,9 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    # Преобразуем метки в one-hot encoding
+    true_labels_onehot = np.eye(num_class)[true_labels]
+
     # Проверка наличия объектов обоих классов
     unique_labels = np.unique(true_labels)
     if len(unique_labels) < 2:
@@ -115,8 +118,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.figure()
 
     if num_class > 2:
-        true_labels_onehot = np.eye(num_class)[true_labels]
-
         precision = {}
         recall = {}
         pr_auc = {}
