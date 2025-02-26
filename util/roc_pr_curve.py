@@ -125,18 +125,16 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         for i in range(num_class):
             # Рассчитываем Precision, Recall и AUC-PR для каждого класса
             precision[i], recall[i], _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
-            pr_auc[i] = auc(recall[i], precision[i])
+            pr_auc[i] = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])  # Используем average_precision_score
 
-            # Рассчитываем AUC-PR через average_precision_score для проверки
-            auc_pr_score = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])
-            print(f"Class {class_names[i]} - AUC-PR (precision_recall_curve): {pr_auc[i]:.4f}, AUC-PR (average_precision_score): {auc_pr_score:.4f}")
+            print(f"Class {class_names[i]} - AUC-PR (average_precision_score): {pr_auc[i]:.4f}")
 
             # Строим кривую Precision-Recall для каждого класса
             plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.4f})')
 
         # Микро-усреднение
         precision["micro"], recall["micro"], _ = precision_recall_curve(true_labels_onehot.ravel(), predicted_probs.ravel())
-        pr_auc["micro"] = auc(recall["micro"], precision["micro"])
+        pr_auc["micro"] = average_precision_score(true_labels_onehot.ravel(), predicted_probs.ravel())  # Используем average_precision_score
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.4f})', linestyle='--')
 
         # Макро-усреднение
@@ -154,11 +152,9 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         # Для бинарной классификации
         positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
-        pr_auc = auc(recall, precision)
+        pr_auc = average_precision_score(true_labels, positive_probs)  # Используем average_precision_score
 
-        # Рассчитываем AUC-PR через average_precision_score для проверки
-        auc_pr_score = average_precision_score(true_labels, positive_probs)
-        print(f"Class {class_names[0]} - AUC-PR (precision_recall_curve): {pr_auc:.4f}, AUC-PR (average_precision_score): {auc_pr_score:.4f}")
+        print(f"Class {class_names[0]} - AUC-PR (average_precision_score): {pr_auc:.4f}")
 
         # Строим кривую Precision-Recall
         plt.plot(recall, precision, label=f'{class_names[0]} (AUC = {pr_auc:.4f})')
