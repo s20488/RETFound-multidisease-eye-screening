@@ -162,21 +162,27 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
         target = batch[-1]
         images = images.to(device, non_blocking=True)
         target = target.to(device, non_blocking=True)
-        true_label = F.one_hot(target.to(torch.int64), num_classes=num_class)
+        true_label=F.one_hot(target.to(torch.int64), num_classes=num_class)
 
         # compute output
         with torch.cuda.amp.autocast():
             output = model(images)
             loss = criterion(output, target)
             prediction_softmax = nn.Softmax(dim=1)(output)
-            _, prediction_decode = torch.max(prediction_softmax, 1)
-            _, true_label_decode = torch.max(true_label, 1)
+            _,prediction_decode = torch.max(prediction_softmax, 1)
+            _,true_label_decode = torch.max(true_label, 1)
 
             prediction_decode_list.extend(prediction_decode.cpu().detach().numpy())
             true_label_decode_list.extend(true_label_decode.cpu().detach().numpy())
             true_label_onehot_list.extend(true_label.cpu().detach().numpy())
             prediction_list.extend(prediction_softmax.cpu().detach().numpy())
 
+        acc1,_ = accuracy(output, target, topk=(1,2))  # change acc1 on top_1_acc
+
+        batch_size = images.shape[0]
+        metric_logger.update(loss=loss.item())
+        metric_logger.meters['acc1'].update(acc1.item(), n=batch_size)
+    # gather the stats from all processes
     true_label_decode_list = np.array(true_label_decode_list)
     prediction_decode_list = np.array(prediction_decode_list)
 
