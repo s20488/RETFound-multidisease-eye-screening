@@ -109,14 +109,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
-    print("Plot predicted_probs shape:", predicted_probs.shape)
-    print("Plot predicted_probs[:5]:", predicted_probs[:5])
-
-    # Сохраняем true_labels и predicted_probs для сравнения с evaluate
-    np.save(os.path.join(task, "plot_true_labels.npy"), true_labels)
-    np.save(os.path.join(task, "plot_predicted_probs.npy"), predicted_probs)
-    print(f"Saved true_labels and predicted_probs from plot_pr_curve to {task}")
-
     # Преобразуем метки в one-hot encoding
     true_labels_onehot = np.eye(num_class)[true_labels]
 
@@ -144,22 +136,19 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
             plt.plot(recall, precision, label=f'{class_names[i]} (AUC = {auc_pr_class:.4f})')
 
     else:
-        # Для бинарной классификации используем average_precision_score
-        # Определяем индекс класса "hypertension" (первый класс в списке)
+        # Для бинарной классификации используем average_precision_score с average='macro'
+        auc_pr = average_precision_score(true_labels_onehot, predicted_probs, average='macro')
+        print(f"Macro-average AUC-PR: {auc_pr:.4f}")
+
+        # Рассчитываем AUC-PR для положительного класса
         positive_class_index = 0  # "hypertension" соответствует индексу 0
-        print(f"Positive class index: {positive_class_index}")  # Проверка индекса положительного класса
-
-        # Выбираем вероятности для положительного класса
         positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
-        print(f"Positive probabilities shape: {positive_probs.shape}, content: {positive_probs[:10]}")  # Первые 10 вероятностей
-
-        # Рассчитываем AUC-PR
-        auc_pr = average_precision_score(true_labels, positive_probs)
-        print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr:.4f}")
+        auc_pr_class = average_precision_score(true_labels, positive_probs)
+        print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr_class:.4f}")
 
         # Строим кривую Precision-Recall
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
-        plt.plot(recall, precision, label=f'{class_names[positive_class_index]} (AUC = {auc_pr:.4f})')
+        plt.plot(recall, precision, label=f'{class_names[positive_class_index]} (AUC = {auc_pr_class:.4f})')
 
     plt.xlabel('Recall')
     plt.ylabel('Precision')
