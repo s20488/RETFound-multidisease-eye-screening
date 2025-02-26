@@ -112,6 +112,9 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    print("Plot predicted_probs shape:", predicted_probs.shape)
+    print("Plot predicted_probs[:5]:", predicted_probs[:5])
+
     # Сохраняем true_labels и predicted_probs для сравнения с evaluate
     np.save(os.path.join(task, "plot_true_labels.npy"), true_labels)
     np.save(os.path.join(task, "plot_predicted_probs.npy"), predicted_probs)

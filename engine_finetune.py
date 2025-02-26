@@ -186,6 +186,9 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     true_label_decode_list = np.array(true_label_decode_list)
     prediction_decode_list = np.array(prediction_decode_list)
 
+    print("Evaluate predicted_probs shape:", np.array(prediction_list).shape)
+    print("Evaluate predicted_probs[:5]:", np.array(prediction_list)[:5])
+
     # Сохраняем true_labels и predicted_probs для сравнения с plot_pr_curve
     np.save(os.path.join(task, "eval_true_labels.npy"), true_label_decode_list)
     np.save(os.path.join(task, "eval_predicted_probs.npy"), np.array(prediction_list))
