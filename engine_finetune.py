@@ -246,19 +246,28 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
                 class_precision = tp / (tp + fp) if (tp + fp) > 0 else 0
                 class_f1 = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0
                 class_mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if ((
-                               tp + fp) * (
-                               tp + fn) * (
-                               tn + fp) * (
-                               tn + fn)) > 0 else 0
+                                                                                                                         tp + fp) * (
+                                                                                                                         tp + fn) * (
+                                                                                                                         tn + fp) * (
+                                                                                                                         tn + fn)) > 0 else 0
 
-                class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
-                    np.unique(true_label_onehot_array[:, i])) > 1 else 0
-                class_auc_pr = average_precision_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
-                    np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                if num_class > 2:
+                    class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
+                        np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                    class_auc_pr = average_precision_score(true_label_onehot_array[:, i],
+                                                           prediction_array[:, i]) if len(
+                        np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                else:
+                    if i == 0:
+                        class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
+                            np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                        class_auc_pr = average_precision_score(true_label_onehot_array[:, i],
+                                                               prediction_array[:, i]) if len(
+                            np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                    else:
+                        class_auc_roc = 0
+                        class_auc_pr = 0
 
                 wf.writerow([class_names[i], (tp + tn) / (tp + tn + fp + fn), class_sensitivity, class_specificity,
                              class_precision, class_auc_roc, class_auc_pr, class_f1, class_mcc])
-
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
-
-
