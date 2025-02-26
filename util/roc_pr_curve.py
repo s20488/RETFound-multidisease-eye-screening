@@ -143,11 +143,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         # Рассчитываем AUC-PR для положительного класса
         positive_class_index = 0  # "hypertension" соответствует индексу 0
         positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
-        auc_pr_class = average_precision_score(true_labels, positive_probs)
+        auc_pr_class = average_precision_score(true_labels == positive_class_index, positive_probs)
         print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr_class:.4f}")
 
         # Строим кривую Precision-Recall
-        precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
+        precision, recall, _ = precision_recall_curve(true_labels == positive_class_index, positive_probs)
         plt.plot(recall, precision, label=f'{class_names[positive_class_index]} (AUC = {auc_pr_class:.4f})')
 
     plt.xlabel('Recall')
