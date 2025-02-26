@@ -112,6 +112,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    # Сохраняем true_labels и predicted_probs для сравнения с evaluate
+    np.save(os.path.join(task, "plot_true_labels.npy"), true_labels)
+    np.save(os.path.join(task, "plot_predicted_probs.npy"), predicted_probs)
+    print(f"Saved true_labels and predicted_probs from plot_pr_curve to {task}")
+
     # Преобразуем метки в one-hot encoding, как в evaluate
     true_labels_onehot = np.eye(num_class)[true_labels]
 
@@ -151,6 +156,10 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         # Рассчитываем AUC-PR
         auc_pr = average_precision_score(true_labels, positive_probs)
         print(f"Class {class_names[positive_class_index]} - AUC-PR: {auc_pr:.4f}")
+
+        # Проверка параметров average_precision_score
+        print(f"Calling average_precision_score with: true_labels={true_labels[:10]}, positive_probs={positive_probs[:10]}")
+        print(f"Parameters: average=None (binary)")
 
         # Строим кривую Precision-Recall
         precision, recall, _ = precision_recall_curve(true_labels, positive_probs)
