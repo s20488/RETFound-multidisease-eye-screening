@@ -109,13 +109,13 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
-    print("Evaluate predicted_probs shape:", np.array(prediction_list).shape)
-    print("Evaluate predicted_probs[:5]:", np.array(prediction_list)[:5])
+    print("Plot predicted_probs shape:", predicted_probs.shape)
+    print("Plot predicted_probs[:5]:", predicted_probs[:5])
 
-    # Сохраняем true_labels и predicted_probs для сравнения с plot_pr_curve
-    np.save(os.path.join(task, "eval_true_labels.npy"), true_label_decode_list)
-    np.save(os.path.join(task, "eval_predicted_probs.npy"), np.array(prediction_list))
-    print(f"Saved true_labels and predicted_probs from evaluate to {task}")
+    # Сохраняем true_labels и predicted_probs для сравнения с evaluate
+    np.save(os.path.join(task, "plot_true_labels.npy"), true_labels)
+    np.save(os.path.join(task, "plot_predicted_probs.npy"), predicted_probs)
+    print(f"Saved true_labels and predicted_probs from plot_pr_curve to {task}")
 
     # Преобразуем метки в one-hot encoding
     true_labels_onehot = np.eye(num_class)[true_labels]
