@@ -99,7 +99,11 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         targets = batch[-1].to(device, non_blocking=True)
 
         outputs = model(images)
-        softmax_probs = torch.nn.Softmax(dim=1)(outputs) if num_class > 2 else torch.sigmoid(outputs)
+        # Для многоклассовой классификации используем Softmax, для бинарной — Sigmoid
+        if num_class > 2:
+            softmax_probs = torch.nn.Softmax(dim=1)(outputs)
+        else:
+            softmax_probs = torch.sigmoid(outputs)
 
         true_labels.extend(targets.cpu().numpy())
         predicted_probs.extend(softmax_probs.cpu().numpy())
@@ -107,8 +111,12 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
-    # Преобразуем метки в one-hot encoding
-    true_labels_onehot = np.eye(num_class)[true_labels]
+    # Преобразуем метки в one-hot encoding для многоклассовой классификации
+    if num_class > 2:
+        true_labels_onehot = np.eye(num_class)[true_labels]
+    else:
+        # Для бинарной классификации используем метки как есть
+        true_labels_onehot = true_labels
 
     # Проверка наличия объектов обоих классов
     unique_labels = np.unique(true_labels)
@@ -134,7 +142,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     else:
         # Для бинарной классификации используем average_precision_score
-        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
+        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
         auc_pr = average_precision_score(true_labels, positive_probs)
         print(f"Class {class_names[0]} - AUC-PR: {auc_pr:.4f}")
 
