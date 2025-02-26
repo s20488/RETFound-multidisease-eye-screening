@@ -100,7 +100,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         targets = batch[-1].to(device, non_blocking=True)
 
         outputs = model(images)
-        # Для многоклассовой классификации используем Softmax, для бинарной — Sigmoid
+        # Используем Softmax для многоклассовой классификации и Sigmoid для бинарной
         if num_class > 2:
             softmax_probs = torch.nn.Softmax(dim=1)(outputs)
         else:
@@ -112,25 +112,8 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
-    # Проверка формы и содержимого
-    print(f"True labels shape: {true_labels.shape}, content: {true_labels[:10]}")  # Первые 10 меток
-    print(f"Predicted probabilities shape: {predicted_probs.shape}, content: {predicted_probs[:10]}")  # Первые 10 вероятностей
-
-    # Если метки — строки, преобразуем их в числовой формат
-    if isinstance(true_labels[0], str):
-        label_to_index = {label: idx for idx, label in enumerate(class_names)}
-        print(f"Label to index mapping: {label_to_index}")  # Проверка маппинга
-        true_labels = np.array([label_to_index[label] for label in true_labels])
-        print(f"Converted true labels: {true_labels[:10]}")  # Первые 10 преобразованных меток
-
-    # Преобразуем метки в one-hot encoding для многоклассовой классификации
-    if num_class > 2:
-        true_labels_onehot = np.eye(num_class)[true_labels]
-        print(f"One-hot encoded true labels: {true_labels_onehot[:10]}")  # Первые 10 one-hot меток
-    else:
-        # Для бинарной классификации используем метки как есть
-        true_labels_onehot = true_labels
-        print(f"Binary true labels: {true_labels_onehot[:10]}")  # Первые 10 меток
+    # Преобразуем метки в one-hot encoding, как в evaluate
+    true_labels_onehot = np.eye(num_class)[true_labels]
 
     # Проверка наличия объектов обоих классов
     unique_labels = np.unique(true_labels)
@@ -161,13 +144,9 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         positive_class_index = 0  # "hypertension" соответствует индексу 0
         print(f"Positive class index: {positive_class_index}")  # Проверка индекса положительного класса
 
-        # Проверка формы predicted_probs
-        if predicted_probs.ndim == 2:
-            positive_probs = predicted_probs[:, positive_class_index]
-            print(f"Positive probabilities shape: {positive_probs.shape}, content: {positive_probs[:10]}")  # Первые 10 вероятностей
-        else:
-            positive_probs = predicted_probs
-            print(f"Positive probabilities (1D): {positive_probs[:10]}")  # Первые 10 вероятностей
+        # Выбираем вероятности для положительного класса
+        positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
+        print(f"Positive probabilities shape: {positive_probs.shape}, content: {positive_probs[:10]}")  # Первые 10 вероятностей
 
         # Рассчитываем AUC-PR
         auc_pr = average_precision_score(true_labels, positive_probs)
