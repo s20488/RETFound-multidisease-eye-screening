@@ -142,7 +142,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
 
     else:
         # Для бинарной классификации используем average_precision_score
-        positive_probs = predicted_probs[:, 1] if predicted_probs.ndim == 2 else predicted_probs
+        positive_probs = predicted_probs[:, 0] if predicted_probs.ndim == 2 else predicted_probs
         auc_pr = average_precision_score(true_labels, positive_probs)
         print(f"Class {class_names[0]} - AUC-PR: {auc_pr:.4f}")
 
