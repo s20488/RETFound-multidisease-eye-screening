@@ -197,7 +197,7 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     metric_logger.synchronize_between_processes()
 
     print(
-        'Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'
+        'Sklearn Metrics - Acc: {:.3f} AUC-roc: {:.3f} AUC-pr: {:.3f} F1-score: {:.3f} MCC: {:.3f}'
         .format(acc, auc_roc, auc_pr, F1, mcc))
     results_path = task + '_metrics_{}.csv'.format(mode)
     with open(results_path, mode='a', newline='', encoding='utf8') as cfa:
@@ -261,6 +261,18 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
                         class_auc_roc = 0
                         class_auc_pr = 0
 
-                wf.writerow([class_names[i], (tp + tn) / (tp + tn + fp + fn), class_sensitivity, class_specificity,
-                             class_precision, class_auc_roc, class_auc_pr, class_f1, class_mcc])
+                accuracy = (tp + tn) / (tp + tn + fp + fn)
+                row = [
+                    class_names[i],
+                    f"{accuracy:.3f}",
+                    f"{class_sensitivity:.3f}",
+                    f"{class_specificity:.3f}",
+                    f"{class_precision:.3f}",
+                    f"{class_auc_roc:.3f}",
+                    f"{class_auc_pr:.3f}",
+                    f"{class_f1:.3f}",
+                    f"{class_mcc:.3f}"
+                ]
+                wf.writerow(row)
+
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
