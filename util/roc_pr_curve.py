@@ -70,10 +70,12 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
 
     else:
-        auc_roc = roc_auc_score(true_labels, predicted_probs[:, 0])
+        positive_class_index = 0
+        positive_probs = predicted_probs[:, positive_class_index]
+        auc_roc = roc_auc_score(true_labels, positive_probs)
 
-        fpr, tpr, _ = roc_curve(true_labels, predicted_probs[:, 0])
-        plt.plot(fpr, tpr, label=f'{class_names[0]} (AUC = {auc_roc:.2f})')
+        fpr, tpr, _ = roc_curve(1 - true_labels, 1 - positive_probs)
+        plt.plot(fpr, tpr, label=f'{class_names[positive_class_index]} (AUC = {auc_roc:.2f})')
 
     plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random classifier')
     plt.xlabel('1 - Specificity')
