@@ -72,9 +72,9 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     else:
         positive_class_index = 0
         positive_probs = predicted_probs[:, positive_class_index]
-        auc_roc = roc_auc_score(true_labels, positive_probs)
+        auc_roc = roc_auc_score(true_labels == positive_class_index, positive_probs)
 
-        fpr, tpr, _ = roc_curve(1 - true_labels, 1 - positive_probs)
+        fpr, tpr, _ = roc_curve(true_labels == positive_class_index, positive_probs)
         plt.plot(fpr, tpr, label=f'{class_names[positive_class_index]} (AUC = {auc_roc:.2f})')
 
     plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random classifier')
