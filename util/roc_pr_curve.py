@@ -14,6 +14,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     dataset = data_loader.dataset
     if hasattr(dataset, 'classes'):
         class_names = dataset.classes
+        print(f"Class names: {class_names}")
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
@@ -22,7 +23,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         targets = batch[-1].to(device, non_blocking=True)
 
         outputs = model(images)
-        softmax_probs = torch.nn.Softmax(dim=1)(outputs) if num_class > 2 else torch.sigmoid(outputs)
+        softmax_probs = torch.nn.Softmax(dim=1)(outputs)
 
         true_labels.extend(targets.cpu().numpy())
         predicted_probs.extend(softmax_probs.cpu().numpy())
@@ -30,11 +31,17 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     true_labels = np.array(true_labels)
     predicted_probs = np.array(predicted_probs)
 
+    true_labels_onehot = np.eye(num_class)[true_labels]
+
+    unique_labels = np.unique(true_labels)
+    print(f"Unique labels: {unique_labels}")
+    if len(unique_labels) < 2:
+        print(f"Ошибка: В данных только один класс ({unique_labels}). Невозможно рассчитать AUC-PR.")
+        return
+
     plt.figure()
 
     if num_class > 2:
-        true_labels_onehot = np.eye(num_class)[true_labels]
-
         fpr = {}
         tpr = {}
         roc_auc = {}
@@ -63,7 +70,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
     else:
-        positive_probs = predicted_probs[:, 1]
+        positive_probs = predicted_probs[:, 0]
         fpr, tpr, _ = roc_curve(true_labels, positive_probs)
         roc_auc = auc(fpr, tpr)
 
