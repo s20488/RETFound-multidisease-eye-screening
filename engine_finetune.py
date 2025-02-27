@@ -261,10 +261,9 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
                         class_auc_roc = 0
                         class_auc_pr = 0
 
-                accuracy = (tp + tn) / (tp + tn + fp + fn)
                 row = [
                     class_names[i],
-                    f"{accuracy:.3f}",
+                    f"{(tp + tn) / (tp + tn + fp + fn):.3f}",
                     f"{class_sensitivity:.3f}",
                     f"{class_specificity:.3f}",
                     f"{class_precision:.3f}",
