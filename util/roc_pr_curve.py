@@ -125,11 +125,36 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     plt.figure()
 
     if num_class > 2:
-        for i in range(num_class):
-            auc_pr_class = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])
+        precision = {}
+        recall = {}
+        pr_auc = {}
 
-            precision, recall, _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
-            plt.plot(recall, precision, label=f'{class_names[i]} (AUC = {auc_pr_class:.4f})')
+        for i in range(num_class):
+            precision[i], recall[i], _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
+            pr_auc[i] = auc(recall[i], precision[i])
+
+        precision["micro"], recall["micro"], _ = precision_recall_curve(true_labels_onehot.ravel(),
+                                                                        predicted_probs.ravel())
+        pr_auc["micro"] = auc(recall["micro"], precision["micro"])
+
+        all_recall = np.unique(np.concatenate([recall[i] for i in range(num_class)]))
+        mean_precision = np.zeros_like(all_recall)
+
+        for i in range(num_class):
+            mean_precision += np.interp(all_recall, recall[i][::-1], precision[i][::-1])
+
+        mean_precision /= num_class
+        recall["macro"] = all_recall
+        precision["macro"] = mean_precision
+        pr_auc["macro"] = auc(recall["macro"], precision["macro"])
+
+        for i in range(num_class):
+            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.2f})')
+
+        plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})',
+                 linestyle='--')
+        plt.plot(recall["macro"], precision["macro"], label=f'Macro-average (AUC = {pr_auc["macro"]:.2f})',
+                 linestyle=':')
 
     else:
         positive_class_index = 0
