@@ -14,7 +14,6 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     dataset = data_loader.dataset
     if hasattr(dataset, 'classes'):
         class_names = dataset.classes
-        print(f"Class names: {class_names}")
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
@@ -34,9 +33,9 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
     true_labels_onehot = np.eye(num_class)[true_labels]
 
     unique_labels = np.unique(true_labels)
-    print(f"Unique labels: {unique_labels}")
+
     if len(unique_labels) < 2:
-        print(f"Ошибка: В данных только один класс ({unique_labels}). Невозможно рассчитать AUC-PR.")
+        print(f"Error: Only one class ({unique_labels}) in the data. Unable to calculate the AUC-PR.")
         return
 
     plt.figure()
@@ -69,12 +68,12 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
 
         plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
-    else:
-        positive_probs = predicted_probs[:, 0]
-        fpr, tpr, _ = roc_curve(true_labels, positive_probs)
-        roc_auc = auc(fpr, tpr)
 
-        plt.plot(fpr, tpr, label=f'{class_names[0]} (AUC = {roc_auc:.2f})')
+    else:
+        auc_roc = roc_auc_score(true_labels, predicted_probs[:, 0])
+
+        fpr, tpr, _ = roc_curve(true_labels, predicted_probs[:, 0])
+        plt.plot(fpr, tpr, label=f'{class_names[0]} (AUC = {auc_roc:.2f})')
 
     plt.plot([0, 1], [0, 1], color='gray', linestyle='--', label='Random classifier')
     plt.xlabel('1 - Specificity')
@@ -97,7 +96,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     dataset = data_loader.dataset
     if hasattr(dataset, 'classes'):
         class_names = dataset.classes
-        print(f"Class names: {class_names}")
     else:
         class_names = [f'Class {i}' for i in range(num_class)]
 
@@ -117,28 +115,21 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels_onehot = np.eye(num_class)[true_labels]
 
     unique_labels = np.unique(true_labels)
-    print(f"Unique labels: {unique_labels}")
+
     if len(unique_labels) < 2:
-        print(f"Ошибка: В данных только один класс ({unique_labels}). Невозможно рассчитать AUC-PR.")
+        print(f"Error: Only one class ({unique_labels}) in the data. Unable to calculate the AUC-PR.")
         return
 
     plt.figure()
 
     if num_class > 2:
-        auc_pr_macro = average_precision_score(true_labels_onehot, predicted_probs, average='macro')
-        print(f"Macro-average AUC-PR: {auc_pr_macro:.4f}")
-
         for i in range(num_class):
             auc_pr_class = average_precision_score(true_labels_onehot[:, i], predicted_probs[:, i])
-            print(f"Class {class_names[i]} - AUC-PR: {auc_pr_class:.4f}")
 
             precision, recall, _ = precision_recall_curve(true_labels_onehot[:, i], predicted_probs[:, i])
             plt.plot(recall, precision, label=f'{class_names[i]} (AUC = {auc_pr_class:.4f})')
 
     else:
-        auc_pr = average_precision_score(true_labels_onehot, predicted_probs)
-        print(f"Macro-average AUC-PR: {auc_pr:.4f}")
-
         positive_class_index = 0
         positive_probs = predicted_probs[:, positive_class_index] if predicted_probs.ndim == 2 else predicted_probs
         auc_pr_class = average_precision_score(true_labels == positive_class_index, positive_probs)
