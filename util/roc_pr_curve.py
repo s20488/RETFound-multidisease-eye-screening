@@ -64,7 +64,7 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
         roc_auc["macro"] = auc(fpr["macro"], tpr["macro"])
 
         for i in range(num_class):
-            plt.plot(fpr[i], tpr[i], label=f'{class_names[i]} (AUC = {roc_auc[i]:.2f})')
+            plt.plot(fpr[i], tpr[i], label=f'{class_names[i]} (AUC = {roc_auc[i]:.3f})')
 
         plt.plot(fpr["micro"], tpr["micro"], label=f'Micro-average (AUC = {roc_auc["micro"]:.2f})', linestyle='--')
         plt.plot(fpr["macro"], tpr["macro"], label=f'Macro-average (AUC = {roc_auc["macro"]:.2f})', linestyle=':')
@@ -149,7 +149,7 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
         pr_auc["macro"] = auc(recall["macro"], precision["macro"])
 
         for i in range(num_class):
-            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.2f})')
+            plt.plot(recall[i], precision[i], label=f'{class_names[i]} (AUC = {pr_auc[i]:.3f})')
 
         plt.plot(recall["micro"], precision["micro"], label=f'Micro-average (AUC = {pr_auc["micro"]:.2f})',
                  linestyle='--')
