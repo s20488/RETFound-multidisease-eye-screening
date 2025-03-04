@@ -134,18 +134,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Datasets
-IDRiD_data
-origa
-
-# RETFound pre-trained weights
-pretrained_weights/RETFound_cfp_weights.pth
-
-# ORIGA set outputs
-output_dir
-internal_IDRiD
-finetune_IDRiD
-
 # Datasets Jupyter processing
 /datasets_processing/
-/pretrained_weights/
