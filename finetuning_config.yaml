@@ -20,6 +20,6 @@ input_size: 224
 num_workers: 24
 world_size: 1
 pin_mem: True
-data_path: /mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/REFUGE2/
-task: ./results/finetune_REFUGE2/
+data_path: /mnt/data/Anastasiia_Ponkratova/RETFound_MAE/datasets/Kaggle/
+task: ./results/finetune_Kaggle/
 finetune: ./pretrained_weights/RETFound_cfp_weights.pth
