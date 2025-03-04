@@ -34,10 +34,6 @@ def plot_roc_curve(data_loader, model, device, num_class, task):
 
     unique_labels = np.unique(true_labels)
 
-    if len(unique_labels) < 2:
-        print(f"Error: Only one class ({unique_labels}) in the data. Unable to calculate the AUC-PR.")
-        return
-
     plt.figure()
 
     if num_class > 2:
@@ -117,10 +113,6 @@ def plot_pr_curve(data_loader, model, device, num_class, task):
     true_labels_onehot = np.eye(num_class)[true_labels]
 
     unique_labels = np.unique(true_labels)
-
-    if len(unique_labels) < 2:
-        print(f"Error: Only one class ({unique_labels}) in the data. Unable to calculate the AUC-PR.")
-        return
 
     plt.figure()
 
