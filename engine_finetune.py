@@ -17,6 +17,7 @@ import util.misc as misc
 import util.lr_sched as lr_sched
 from sklearn.metrics import roc_auc_score, average_precision_score,multilabel_confusion_matrix
 from pycm import *
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -184,26 +185,93 @@ def evaluate(data_loader, model, device, task, epoch, mode, num_class):
     # gather the stats from all processes
     true_label_decode_list = np.array(true_label_decode_list)
     prediction_decode_list = np.array(prediction_decode_list)
-    confusion_matrix = multilabel_confusion_matrix(true_label_decode_list, prediction_decode_list,labels=[i for i in range(num_class)])
-    acc, sensitivity, specificity, precision, G, F1, mcc = misc_measures(confusion_matrix)
 
-    auc_roc = roc_auc_score(true_label_onehot_list, prediction_list,multi_class='ovr',average='macro')
-    auc_pr = average_precision_score(true_label_onehot_list, prediction_list,average='macro')
+    multi_cm = multilabel_confusion_matrix(true_label_decode_list, prediction_decode_list,
+                                           labels=[i for i in range(num_class)])
+
+    acc, sensitivity, specificity, precision, G, F1, mcc = misc_measures(multi_cm)
+
+    auc_roc = roc_auc_score(true_label_onehot_list, prediction_list, multi_class='ovr', average='macro')
+    auc_pr = average_precision_score(true_label_onehot_list, prediction_list, average='macro')
 
     metric_logger.synchronize_between_processes()
 
-    print('Sklearn Metrics - Acc: {:.4f} AUC-roc: {:.4f} AUC-pr: {:.4f} F1-score: {:.4f} MCC: {:.4f}'.format(acc, auc_roc, auc_pr, F1, mcc))
-    results_path = task+'_metrics_{}.csv'.format(mode)
-    with open(results_path,mode='a',newline='',encoding='utf8') as cfa:
+    print(
+        'Sklearn Metrics - Acc: {:.3f} AUC-roc: {:.3f} AUC-pr: {:.3f} F1-score: {:.3f} MCC: {:.3f}'
+        .format(acc, auc_roc, auc_pr, F1, mcc))
+    results_path = task + '_metrics_{}.csv'.format(mode)
+    with open(results_path, mode='a', newline='', encoding='utf8') as cfa:
         wf = csv.writer(cfa)
-        data2=[[acc,sensitivity,specificity,precision,auc_roc,auc_pr,F1,mcc,metric_logger.loss]]
+        data2 = [[acc, sensitivity, specificity, precision, auc_roc, auc_pr, F1, mcc, metric_logger.loss]]
         for i in data2:
             wf.writerow(i)
 
     if mode == 'test':
-        cm = ConfusionMatrix(actual_vector=true_label_decode_list, predict_vector=prediction_decode_list)
-        cm.plot(cmap=plt.cm.Blues,number_label=True,normalized=True,plot_lib="matplotlib")
-        plt.savefig(task+'confusion_matrix_test.jpg',dpi=600,bbox_inches ='tight')
+        dataset = data_loader.dataset
+        if hasattr(dataset, 'classes'):
+            class_names = dataset.classes
+        else:
+            class_names = [f'Class {i}' for i in range(num_class)]
+
+        true_label_onehot_array = np.array(true_label_onehot_list)
+        prediction_array = np.array(prediction_list)
+
+        cm_array = confusion_matrix(true_label_decode_list, prediction_decode_list, normalize="true")
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm_array, display_labels=class_names)
+        disp.plot(cmap=plt.cm.Blues, values_format=".3f")
+        plt.savefig(task + 'confusion_matrix_test.jpg', dpi=600, bbox_inches='tight')
+
+        # Calculate metrics per class
+        class_metrics_path = task + '_class_metrics_test.csv'
+        with open(class_metrics_path, mode='a', newline='', encoding='utf8') as cfa:
+            wf = csv.writer(cfa)
+            wf.writerow(['Class', 'Acc', 'Sensitivity', 'Specificity', 'Precision', 'AUC-ROC',
+                         'AUC-PR', 'F1', 'MCC'])
+
+            for i in range(num_class):
+                tp = multi_cm[i][1][1]
+                tn = multi_cm[i][0][0]
+                fp = multi_cm[i][0][1]
+                fn = multi_cm[i][1][0]
+
+                class_sensitivity = tp / (tp + fn) if (tp + fn) > 0 else 0
+                class_specificity = tn / (tn + fp) if (tn + fp) > 0 else 0
+                class_precision = tp / (tp + fp) if (tp + fp) > 0 else 0
+                class_f1 = (2 * tp) / (2 * tp + fp + fn) if (2 * tp + fp + fn) > 0 else 0
+                class_mcc = ((tp * tn) - (fp * fn)) / np.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) if ((
+                                                                                                                         tp + fp) * (
+                                                                                                                         tp + fn) * (
+                                                                                                                         tn + fp) * (
+                                                                                                                         tn + fn)) > 0 else 0
+
+                if num_class > 2:
+                    class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
+                        np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                    class_auc_pr = average_precision_score(true_label_onehot_array[:, i],
+                                                           prediction_array[:, i]) if len(
+                        np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                else:
+                    if i == 0:
+                        class_auc_roc = roc_auc_score(true_label_onehot_array[:, i], prediction_array[:, i]) if len(
+                            np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                        class_auc_pr = average_precision_score(true_label_onehot_array[:, i],
+                                                               prediction_array[:, i]) if len(
+                            np.unique(true_label_onehot_array[:, i])) > 1 else 0
+                    else:
+                        class_auc_roc = 0
+                        class_auc_pr = 0
+
+                row = [
+                    class_names[i],
+                    f"{(tp + tn) / (tp + tn + fp + fn):.3f}",
+                    f"{class_sensitivity:.3f}",
+                    f"{class_specificity:.3f}",
+                    f"{class_precision:.3f}",
+                    f"{class_auc_roc:.3f}",
+                    f"{class_auc_pr:.3f}",
+                    f"{class_f1:.3f}",
+                    f"{class_mcc:.3f}"
+                ]
+                wf.writerow(row)
 
     return {k: meter.global_avg for k, meter in metric_logger.meters.items()},auc_roc
-

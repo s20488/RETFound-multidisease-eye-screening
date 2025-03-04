@@ -19,6 +19,8 @@ from torch.utils.tensorboard import SummaryWriter
 
 import timm
 
+from util.roc_pr_curve import plot_roc_curve, plot_pr_curve
+
 assert timm.__version__ == "0.3.2"  # version check
 from timm.models.layers import trunc_normal_
 from timm.data.mixup import Mixup
@@ -28,6 +30,7 @@ import util.lr_decay as lrd
 import util.misc as misc
 from util.datasets import build_dataset
 from util.pos_embed import interpolate_pos_embed
+from sklearn.preprocessing import LabelEncoder
 from util.misc import NativeScalerWithGradNormCount as NativeScaler
 
 import models_vit
@@ -319,6 +322,10 @@ def main(args):
     elif args.smoothing > 0.:
         criterion = LabelSmoothingCrossEntropy(smoothing=args.smoothing)
     else:
+        #class_weights = torch.tensor([3.00, 1.50], device=device)  # cataract
+        #class_weights = torch.tensor([3.00, 1.50], device=device)  # diabetes
+        #class_weights = torch.tensor([3.00, 1.50], device=device)  # glaucoma
+        #criterion = torch.nn.CrossEntropyLoss(weight=class_weights)
         criterion = torch.nn.CrossEntropyLoss()
 
     print("criterion = %s" % str(criterion))
@@ -328,6 +335,9 @@ def main(args):
     if args.eval:
         test_stats, auc_roc = evaluate(data_loader_test, model, device, args.task, epoch=0, mode='test',
                                        num_class=args.nb_classes)
+
+        plot_roc_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
+        plot_pr_curve(data_loader_test, model, device, num_class=args.nb_classes, task=args.task)
         exit(0)
 
     print(f"Start training for {args.epochs} epochs")
@@ -379,15 +389,13 @@ def main(args):
     print('Training time {}'.format(total_time_str))
     state_dict_best = torch.load(args.task + 'checkpoint-best.pth', map_location='cpu')
     model_without_ddp.load_state_dict(state_dict_best['model'])
-    test_stats, auc_roc = evaluate(data_loader_test, model_without_ddp, device, args.task, epoch=0, mode='test',
-                                   num_class=args.nb_classes)
 
 
 if __name__ == '__main__':
     parser = get_args_parser()
     args = parser.parse_args()
 
-    #config = load_config('training_config.yaml')
+    #config = load_config('finetuning_config.yaml')
     config = load_config('evaluation_config.yaml')  # for evaluation only
 
     for key, value in config.items():

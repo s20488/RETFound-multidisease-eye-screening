@@ -139,7 +139,7 @@ IDRiD_data
 origa
 
 # RETFound pre-trained weights
-RETFound_cfp_weights.pth
+pretrained_weights/RETFound_cfp_weights.pth
 
 # ORIGA set outputs
 output_dir
@@ -148,3 +148,4 @@ finetune_IDRiD
 
 # Datasets Jupyter processing
 /datasets_processing/
+/pretrained_weights/
