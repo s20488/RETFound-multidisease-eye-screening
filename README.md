@@ -1,6 +1,6 @@
 ## Automated Detection of Systemic and Ophthalmic Pathologies Using RETFound in Fundus Imaging
 
-This repository contains the implementation and research materials for a scientific-practical study employing deep learning methods to analyze retinal fundus images for automated diagnosis of systemic (hypertension, diabetes) and ophthalmic (cataracts, glaucoma, diabetic retinopathy, and age-related macular degeneration) diseases. Utilizing the advanced RETFound model, this interdisciplinary project enables comprehensive detection of various systemic and ocular diseases through color fundus image interpretation.
+This repository contains the implementation and research materials for a scientific-practical study employing deep learning methods to analyze retinal fundus images for automated diagnosis of systemic (hypertension, diabetes) and ophthalmic (cataract, glaucoma, diabetic retinopathy, and age-related macular degeneration) diseases. Utilizing the advanced RETFound model, this interdisciplinary project enables comprehensive detection of various systemic and ocular diseases through color fundus image interpretation.
 
 ### 📝Key Features
 
@@ -14,7 +14,7 @@ This repository contains the implementation and research materials for a scienti
 
 **Private Dataset** (developed with support from the [Medical University of Białystok](https://www.umb.edu.pl/en/index.php))
 The dataset contains 21,410 fundus images from 3,214 patients. Based on biomarkers, images were categorized into the following disease groups:
-- hypertansion (n=12911)
+- hypertension (n=12911)
 - diabetes (n=2863)
 - cataract (n=2206)
 - glaucoma (n=745)
@@ -30,15 +30,15 @@ All datasets were split into 70% training, 15% validation, and 15% test sets.
 
 The RETFound model demonstrated strong performance across all datasets, particularly on **public** benchmarks:
 
-| Dataset      |  AUC  | Accuracy |
+| Dataset     |  AUC  | Accuracy |
 | ---          | ---   | ---      |
 | Hypertension | 0.788 |   0.718  |
-| Diabetes     | 0.813 |   0.739  |
-| Glaucoma     | 0.856 |   0.777  |
-| Cataracts    | 0.945 |   0.864  |
-| Kaggle       | 0.990 |   0.947  |
-| REFUGE2      | 0.976 |   0.947  |
-| ADAM         | 0.976 |   0.945  |
+| Diabetes    | 0.813 |   0.739  |
+| Glaucoma    | 0.856 |   0.777  |
+| Cataract    | 0.945 |   0.864  |
+| Kaggle      | 0.990 |   0.947  |
+| REFUGE2     | 0.976 |   0.947  |
+| ADAM        | 0.976 |   0.945  |
 
 ### 📊Visualization
 
@@ -50,7 +50,6 @@ An example from the *Kaggle* dataset is shown below:
 
 ### 📍Citation
 
-```
 @article{zhou2023foundation,
   title={A foundation model for generalizable disease detection from retinal images},
   author={Zhou, Yukun and Chia, Mark A and Wagner, Siegfried K and Ayhan, Murat S and Williamson, Dominic J and Struyven, Robbert R and Liu, Timing and Xu, Moucheng and Lozano, Mateo G and Woodward-Court, Peter and others},
@@ -61,4 +60,3 @@ An example from the *Kaggle* dataset is shown below:
   year={2023},
   publisher={Nature Publishing Group UK London}
 }
-```
