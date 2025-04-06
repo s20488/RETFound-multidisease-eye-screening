@@ -46,7 +46,7 @@ For each dataset was build Confusion matrix, AUC ROC, PR AUC and distributin dia
 
 Kaggle dataset visualization example is below:
 
-<img src="./documents/flair.png" width = "750" alt="" align=center /> <br/>
+<img src="./documents/kaggle_visualization_example.jpg" width = "750" alt="" align=center /> <br/>
 
 ### 📃Citation
 
