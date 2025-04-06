@@ -2,7 +2,7 @@
 
 This repository contains the implementation and research materials for a scientific-practical study employing deep learning methods to analyze retinal fundus images for automated diagnosis of systemic (hypertension, diabetes) and ophthalmic (cataracts, glaucoma, diabetic retinopathy, and age-related macular degeneration) diseases. Utilizing the advanced RETFound model, this interdisciplinary project enables comprehensive detection of various systemic and ocular diseases through color fundus image interpretation.
 
-### Key Features
+### 📝Key Features
 
 - **Interdisciplinary approach**: Combining medical knowledge with advanced IT solutions for intelligent diagnostics.
 - **Multi-disease detection**: Identifies systemic and ophthalmic diseases from CFI.
@@ -10,7 +10,7 @@ This repository contains the implementation and research materials for a scienti
 - **Diverse datasets**: Utilization of both private clinical, ensuring real-world applicability of the model, and public datasets.
 - **Transfer learning**: Fine-tuning techniques applied to enhance generalizability and diagnostic accuracy across diverse datasets.
 
-### Dataset Information
+### 🗂Dataset Information
 
 **Private Dataset** (developed with support from the [Medical University of Białystok](https://www.umb.edu.pl/en/index.php))
 The dataset contains 21,410 fundus images from 3,214 patients. Based on biomarkers, images were categorized into the following disease groups:
@@ -26,7 +26,7 @@ The dataset contains 21,410 fundus images from 3,214 patients. Based on biomarke
 
 All datasets were split into 70% training, 15% validation, and 15% test sets. 
 
-### Results 
+### 📏Results 
 
 The RETFound model demonstrated strong performance across all datasets, particularly on **public** benchmarks:
 
@@ -40,7 +40,7 @@ The RETFound model demonstrated strong performance across all datasets, particul
 | REFUGE2      | 0.976 |   0.947  |
 | ADAM         | 0.976 |   0.945  |
 
-## Visualization
+### 📊Visualization
 
 For each dataset, visualizations were created including confusion matrices, AUC-ROC curves, PR-AUC graphs, and distribution diagrams. You can view them [here](https://github.com/s20488/RETFound-multidisease-eye-screening/tree/main/documents).
 
@@ -48,7 +48,7 @@ An example from the *Kaggle* dataset is shown below:
 
 <img src="./documents/kaggle_visualization_example.png" width = "750" alt="" align=center /> <br/>
 
-### 📃Citation
+### 📍Citation
 
 @article{zhou2023foundation,
   title={A foundation model for generalizable disease detection from retinal images},
