@@ -49,8 +49,6 @@ For each dataset, visualizations were created including confusion matrices, AUC-
   <div style="font-style: italic; margin-top: 0px;">Fig. 1: Sample predictions on Kaggle dataset (DR, cataract, glaucoma, normal).</div>
 </div>
 
-
-
 ### 📍Citation
 
 ```
