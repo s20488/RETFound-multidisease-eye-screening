@@ -50,6 +50,7 @@ An example from the *Kaggle* dataset is shown below:
 
 ### 📃Citation
 
+```
 @article{zhou2023foundation,
   title={A foundation model for generalizable disease detection from retinal images},
   author={Zhou, Yukun and Chia, Mark A and Wagner, Siegfried K and Ayhan, Murat S and Williamson, Dominic J and Struyven, Robbert R and Liu, Timing and Xu, Moucheng and Lozano, Mateo G and Woodward-Court, Peter and others},
@@ -60,3 +61,4 @@ An example from the *Kaggle* dataset is shown below:
   year={2023},
   publisher={Nature Publishing Group UK London}
 }
+```
