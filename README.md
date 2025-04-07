@@ -1,4 +1,4 @@
-## Automated Detection of Systemic and Ophthalmic Pathologies Using RETFound in Fundus Imaging
+## Automated Detection of Systemic and Ophthalmic Diseases Using RETFound in Fundus Imaging
 
 This repository contains the implementation and research materials for a scientific-practical study employing deep learning methods to analyze retinal fundus images for automated diagnosis of systemic (hypertension, diabetes) and ophthalmic (cataract, glaucoma, diabetic retinopathy, and age-related macular degeneration) diseases. Utilizing the advanced RETFound model, this interdisciplinary project enables comprehensive detection of various systemic and ocular diseases through color fundus image interpretation.
 
