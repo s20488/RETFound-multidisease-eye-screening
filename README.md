@@ -44,9 +44,12 @@ The RETFound model demonstrated strong performance across all datasets, particul
 
 For each dataset, visualizations were created including confusion matrices, AUC-ROC curves, PR-AUC graphs, and distribution diagrams. You can view them [here](https://github.com/s20488/RETFound-multidisease-eye-screening/tree/main/documents).
 
-An example from the *Kaggle* dataset is shown below:
+<div style="margin-bottom: 0;">
+  <img src="./documents/kaggle_visualization_example.png" width="750" alt=""/>
+  <div style="font-style: italic; margin-top: 0px;">Fig. 1: Sample predictions on Kaggle dataset (DR, cataract, glaucoma, normal).</div>
+</div>
 
-<img src="./documents/kaggle_visualization_example.png" width = "750" alt="" align=center /> <br/>
+
 
 ### 📍Citation
 
